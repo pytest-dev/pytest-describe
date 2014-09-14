@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/ropez/pytest-describe.svg?branch=master
+    :target: https://travis-ci.org/ropez/pytest-describe
+
 Describe-style plugin for py.test
 =================================
 
