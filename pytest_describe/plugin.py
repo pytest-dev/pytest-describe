@@ -53,7 +53,7 @@ class DescribeBlock(pytest.Module):
 
     def classnamefilter(self, name):
         """Don't allow test classes inside describe"""
-        return True
+        return False
 
 
 def pytest_pycollect_makeitem(__multicall__, collector, name, obj):
