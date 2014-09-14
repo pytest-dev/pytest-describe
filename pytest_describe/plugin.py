@@ -55,6 +55,10 @@ class DescribeBlock(pytest.Module):
         """Don't allow test classes inside describe"""
         return False
 
+    def __repr__(self):
+        return "<{} {}>".format(self.__class__.__name__,
+                                repr(self.funcobj.__name__))
+
 
 def pytest_pycollect_makeitem(__multicall__, collector, name, obj):
     res = __multicall__.execute()
