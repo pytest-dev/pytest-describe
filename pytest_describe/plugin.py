@@ -32,6 +32,23 @@ def make_module_from_function(funcobj):
     return module
 
 
+def merge_pytestmark(module, parentobj):
+    try:
+        pytestmark = parentobj.pytestmark
+        if not isinstance(pytestmark, list):
+            pytestmark = [pytestmark]
+        try:
+            if isinstance(module.pytestmark, list):
+                pytestmark.extend(module.pytestmark)
+            else:
+                pytestmark.append(module.pytestmark)
+        except AttributeError:
+            pass
+        module.pytestmark = pytestmark
+    except AttributeError:
+        pass
+
+
 class DescribeBlock(pytest.Module):
     """Module-like object representing the scope of a describe block"""
 
@@ -45,7 +62,9 @@ class DescribeBlock(pytest.Module):
 
     def _importtestmodule(self):
         """Import a describe block as if it was a module"""
-        return make_module_from_function(self.funcobj)
+        module = make_module_from_function(self.funcobj)
+        merge_pytestmark(module, self.parent.obj)
+        return module
 
     def funcnamefilter(self, name):
         """Treat all nested functions as tests, without requiring the 'test_' prefix"""
