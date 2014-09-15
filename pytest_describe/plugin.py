@@ -32,6 +32,20 @@ def make_module_from_function(funcobj):
     return module
 
 
+def copy_markinfo(module, funcobj):
+    from _pytest.mark import MarkInfo
+
+    marks = {}
+    for name, val in funcobj.__dict__.items():
+        if isinstance(val, MarkInfo):
+            marks[name] = val
+
+    for obj in module.__dict__.values():
+        if isinstance(obj, types.FunctionType):
+            for name, mark in marks.items():
+                setattr(obj, name, mark)
+
+
 def merge_pytestmark(module, parentobj):
     try:
         pytestmark = parentobj.pytestmark
@@ -63,6 +77,7 @@ class DescribeBlock(pytest.Module):
     def _importtestmodule(self):
         """Import a describe block as if it was a module"""
         module = make_module_from_function(self.funcobj)
+        copy_markinfo(module, self.funcobj)
         merge_pytestmark(module, self.parent.obj)
         return module
 

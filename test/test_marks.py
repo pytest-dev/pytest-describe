@@ -1,5 +1,4 @@
 import py
-import pytest
 from util import assert_outcomes
 
 pytest_plugins = 'pytester'
@@ -65,16 +64,19 @@ def test_module_marks(testdir):
     assert_outcomes(result, passed=1)
 
 
-@pytest.mark.xfail(reason="not implemented")
 def test_mark_at_describe_function(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""
         import pytest
         @pytest.mark.foo
         def describe_foo():
-            def a_test():
+            def describe_a():
+                def a_test():
+                    pass
+            @pytest.mark.bar
+            def b_test():
                 pass
     """))
 
     result = testdir.runpytest('-k', 'foo')
-    assert_outcomes(result, passed=1)
+    assert_outcomes(result, passed=2)
