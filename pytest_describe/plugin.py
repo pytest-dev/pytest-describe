@@ -49,13 +49,7 @@ class DescribeBlock(pytest.Module):
 
     def funcnamefilter(self, name):
         """Treat all nested functions as tests, without requiring the 'test_' prefix"""
-        if name.startswith('_'):
-            return False
-        for prefix in self.config.getini('describe_prefixes'):
-            if name.startswith(prefix):
-                return False
-        else:
-            return True
+        return not name.startswith('_')
 
     def classnamefilter(self, name):
         """Don't allow test classes inside describe"""
@@ -67,14 +61,12 @@ class DescribeBlock(pytest.Module):
 
 
 def pytest_pycollect_makeitem(__multicall__, collector, name, obj):
-    res = __multicall__.execute()
-    if res is not None:
-        return res
-
     if isinstance(obj, types.FunctionType):
         for prefix in collector.config.getini('describe_prefixes'):
             if obj.__name__.startswith(prefix):
                 return DescribeBlock(obj, collector.fspath, collector)
+
+    return __multicall__.execute()
 
 
 def pytest_addoption(parser):
