@@ -1,7 +1,7 @@
 import imp
 import sys
 import types
-import pytest
+from _pytest.python import PyCollector
 
 
 def trace_function(funcobj, *args, **kwargs):
@@ -63,12 +63,19 @@ def merge_pytestmark(module, parentobj):
         pass
 
 
-class DescribeBlock(pytest.Module):
+class DescribeBlock(PyCollector):
     """Module-like object representing the scope of a describe block"""
 
-    def __init__(self, funcobj, path, parent):
-        super(DescribeBlock, self).__init__(path, parent)
+    def __init__(self, funcobj, parent):
+        super(DescribeBlock, self).__init__(funcobj.__name__, parent)
         self.funcobj = funcobj
+
+    def collect(self):
+        self.session._fixturemanager.parsefactories(self)
+        return super(DescribeBlock, self).collect()
+
+    def _getobj(self):
+        return self._memoizedcall('_obj', self._importtestmodule)
 
     def _makeid(self):
         """Magic that makes fixtures local to each scope"""
@@ -98,7 +105,7 @@ def pytest_pycollect_makeitem(__multicall__, collector, name, obj):
     if isinstance(obj, types.FunctionType):
         for prefix in collector.config.getini('describe_prefixes'):
             if obj.__name__.startswith(prefix):
-                return DescribeBlock(obj, collector.fspath, collector)
+                return DescribeBlock(obj, collector)
 
     return __multicall__.execute()
 
