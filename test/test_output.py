@@ -16,7 +16,6 @@ def test_verbose_output(testdir):
     """))
 
     result = testdir.runpytest('-v')
-    print result.stdout
     expected = [
         'a_dir/test_a.py::describe_something::describe_nested_bad::fails FAILED',
         'a_dir/test_a.py::describe_something::describe_nested_ok::passes PASSED',
