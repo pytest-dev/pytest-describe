@@ -7,15 +7,12 @@ from _pytest.python import PyCollector
 def trace_function(funcobj, *args, **kwargs):
     """Call a function, and return its locals"""
     funclocals = {}
-    trigger = {}
 
     def _tracefunc(frame, event, arg):
-        if event == 'call':
-            # Activate local trace for first call only
-            if frame.f_back.f_locals.get('_tracefunc') == _tracefunc:
-                trigger.update({'exit': frame})
-        elif event == 'return' and frame == trigger.get('exit'):
-            funclocals.update(frame.f_locals.copy())
+        # Activate local trace for first call only
+        if frame.f_back.f_locals.get('_tracefunc') == _tracefunc:
+            if event == 'return':
+                funclocals.update(frame.f_locals.copy())
 
     sys.setprofile(_tracefunc)
     try:
