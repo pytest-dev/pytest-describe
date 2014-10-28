@@ -51,7 +51,7 @@ Example
 Why bother?
 ===========
 
-I've found that quite often my tests have one "dimention" more than my production
+I've found that quite often my tests have one "dimension" more than my production
 code. The production code is organized into packages, modules, classes
 (sometimes), and functions. I like to organize my tests in the same way, but
 tests also have different _cases_ for each function. This tends to end up with
@@ -87,7 +87,7 @@ It has the additional advantage that you can have marks and fixtures that apply
 locally to each group of test function.
 
 With pytest, it's possible to organize tests in a similar way with classes.
-However, I think classes are akward. I dont think the convention of using
+However, I think classes are awkward. I don't think the convention of using
 camel-case names for classes fit very well when testing functions in different
 cases. In addition, every test function must take a "self" argument that is
 never used.
