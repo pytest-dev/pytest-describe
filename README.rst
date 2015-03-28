@@ -54,9 +54,9 @@ Why bother?
 I've found that quite often my tests have one "dimension" more than my production
 code. The production code is organized into packages, modules, classes
 (sometimes), and functions. I like to organize my tests in the same way, but
-tests also have different _cases_ for each function. This tends to end up with
+tests also have different *cases* for each function. This tends to end up with
 a set of tests for each module (or class), where each test has to name both a
-function and a _case_. For instance:
+function and a *case*. For instance:
 
 .. code-block:: python
 
@@ -66,8 +66,6 @@ function and a _case_. For instance:
     def test_my_function_handles_exception():
     def test_some_other_function_returns_true():
     def test_some_other_function_returns_false():
-
-(and so on)
 
 It's much nicer to do this:
 
