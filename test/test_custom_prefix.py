@@ -21,7 +21,7 @@ def test_collect_custom_prefix(testdir):
 
     result = testdir.runpytest('--collectonly')
     print(result.outlines)
-    assert result.stdout.lines[3:-2] == [
+    assert result.stdout.lines[-7:-2] == [
         "collected 1 items",
         "<Module 'a_dir/test_a.py'>",
         "  <DescribeBlock 'foo_scope'>",

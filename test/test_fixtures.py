@@ -18,7 +18,7 @@ def test_can_access_local_fixture(testdir):
                 assert thing == 42
     """))
 
-    result = testdir.runpytest('')
+    result = testdir.runpytest()
     assert_outcomes(result, passed=1)
 
 
@@ -37,7 +37,7 @@ def test_can_access_fixture_from_nested_scope(testdir):
                     assert thing == 42
     """))
 
-    result = testdir.runpytest('')
+    result = testdir.runpytest()
     assert_outcomes(result, passed=1)
 
 
@@ -63,5 +63,5 @@ def test_local_fixture_overrides(testdir):
                 assert thing == 12
     """))
 
-    result = testdir.runpytest('')
+    result = testdir.runpytest()
     assert_outcomes(result, passed=2)
