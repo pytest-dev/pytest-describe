@@ -5,8 +5,8 @@ env:
   - TOX_ENV=py27-pytest28
   - TOX_ENV=py34-pytest27
   - TOX_ENV=py34-pytest28
-  - TOX_ENV=py35-pytest27
-  - TOX_ENV=py35-pytest28
+  # - TOX_ENV=py35-pytest27
+  # - TOX_ENV=py35-pytest28
 install:
   - pip install tox
 script:
