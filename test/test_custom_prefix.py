@@ -8,6 +8,16 @@ describe_prefixes = foo bar
 """
 
 
+def _collect_result(result):
+    lines = result.stdout.lines
+
+    # discard last line if empty
+    if lines[-1] == '':
+        lines = lines[:-1]
+
+    return lines[-7:-2]
+
+
 def test_collect_custom_prefix(testdir):
     testdir.makeini(ini)
 
@@ -21,7 +31,7 @@ def test_collect_custom_prefix(testdir):
 
     result = testdir.runpytest('--collectonly')
     print(result.outlines)
-    assert result.stdout.lines[-7:-2] == [
+    assert _collect_result(result) == [
         "collected 1 items",
         "<Module 'a_dir/test_a.py'>",
         "  <DescribeBlock 'foo_scope'>",
