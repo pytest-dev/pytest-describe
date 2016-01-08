@@ -99,13 +99,11 @@ class DescribeBlock(PyCollector):
                                 repr(self.funcobj.__name__))
 
 
-def pytest_pycollect_makeitem(__multicall__, collector, name, obj):
+def pytest_pycollect_makeitem(collector, name, obj):
     if isinstance(obj, types.FunctionType):
         for prefix in collector.config.getini('describe_prefixes'):
             if obj.__name__.startswith(prefix):
                 return DescribeBlock(obj, collector)
-
-    return __multicall__.execute()
 
 
 def pytest_addoption(parser):

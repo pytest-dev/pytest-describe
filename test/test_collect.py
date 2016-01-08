@@ -19,17 +19,20 @@ def test_collect(testdir):
                     pass
         def foo_not_collected():
             pass
+        def test_something():
+            pass
     """))
 
     result = testdir.runpytest('--collectonly')
     expected_lines = [
-        "collected 3 items",
+        "collected 4 items",
         "  <DescribeBlock 'describe_something'>",
         "    <Function 'is_foo'>",
         "    <Function 'can_bar'>",
         "  <DescribeBlock 'describe_something_else'>",
         "    <DescribeBlock 'describe_nested'>",
         "      <Function 'a_test'>",
+        "  <Function 'test_something'>",
     ]
     for line in expected_lines:
         assert line in result.outlines
