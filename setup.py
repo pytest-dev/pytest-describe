@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pytest-describe',
-    version='0.10.2',
+    version='0.10.3',
     description='Describe-style plugin for pytest',
     url='https://github.com/ropez/pytest-describe',
     author='Robin Pedersen',
