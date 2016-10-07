@@ -89,3 +89,36 @@ However, I think classes are awkward. I don't think the convention of using
 camel-case names for classes fit very well when testing functions in different
 cases. In addition, every test function must take a "self" argument that is
 never used.
+
+Shared Behaviors
+===============
+
+If you've used rspec's shared examples or test class inheritance, then you may
+be familiar with the benefit of having the same tests apply to
+multiple "subjects" or "suts" (system under test).
+
+.. code-block:: python
+
+    from pytest import fixture
+    from pytest_describe import behaves_like
+
+    def a_duck():
+        def it_quacks(sound):
+            assert sound == "quack"
+
+    @behaves_like(a_duck)
+    def describe_something_that_quacks():
+        @fixture
+        def sound():
+            return "quack"
+
+        # the it_quacks test in this describe will pass
+
+    @behaves_like(a_duck)
+    def describe_something_that_barks():
+        @fixture
+        def sound():
+            return "bark"
+
+        # the it_quacks test in this describe will fail (as expected)
+

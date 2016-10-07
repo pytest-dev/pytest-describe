@@ -26,6 +26,8 @@ def trace_function(funcobj, *args, **kwargs):
 def make_module_from_function(funcobj):
     """Evaluates the local scope of a function, as if it was a module"""
     module = imp.new_module(funcobj.__name__)
+    for behavior in getattr(funcobj, '_behaves_like', []):
+        module.__dict__.update(trace_function(behavior))
     module.__dict__.update(trace_function(funcobj))
     return module
 
