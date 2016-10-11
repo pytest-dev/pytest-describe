@@ -26,10 +26,34 @@ def trace_function(funcobj, *args, **kwargs):
 def make_module_from_function(funcobj):
     """Evaluates the local scope of a function, as if it was a module"""
     module = imp.new_module(funcobj.__name__)
-    for behavior in getattr(funcobj, '_behaves_like', []):
-        module.__dict__.update(trace_function(behavior))
+
+    # Import shared behaviors into the generated module. We do this before
+    # importing the direct children, so that fixtures in the block that's
+    # importing the behavior take precedence.
+    for shared_funcobj in getattr(funcobj, '_behaves_like', []):
+        module.__dict__.update(evaluate_shared_behavior(shared_funcobj))
+
+    # Import children
     module.__dict__.update(trace_function(funcobj))
     return module
+
+
+def evaluate_shared_behavior(funcobj):
+    if not hasattr(funcobj, '_shared_functions'):
+        funcobj._shared_functions = {}
+        for name, obj in trace_function(funcobj).items():
+            # Only functions are relevant here
+            if not isinstance(obj, types.FunctionType):
+                continue
+
+            # Mangle names of imported functions, except fixtures because we
+            # want fixtures to be overridden in the block that's importing the
+            # behavior.
+            if not hasattr(obj, '_pytestfixturefunction'):
+                name = obj._mangled_name = "{}::{}".format(funcobj.__name__, name)
+
+            funcobj._shared_functions[name] = obj
+    return funcobj._shared_functions
 
 
 def copy_markinfo(module, funcobj):
@@ -68,6 +92,7 @@ class DescribeBlock(PyCollector):
 
     def __init__(self, funcobj, parent):
         super(DescribeBlock, self).__init__(funcobj.__name__, parent)
+        self._name = getattr(funcobj, '_mangled_name', funcobj.__name__)
         self.funcobj = funcobj
 
     def collect(self):
@@ -79,7 +104,7 @@ class DescribeBlock(PyCollector):
 
     def _makeid(self):
         """Magic that makes fixtures local to each scope"""
-        return self.parent.nodeid + '::' + self.funcobj.__name__
+        return self.parent.nodeid + '::' + self._name
 
     def _importtestmodule(self):
         """Import a describe block as if it was a module"""
@@ -98,7 +123,7 @@ class DescribeBlock(PyCollector):
 
     def __repr__(self):
         return "<{} {}>".format(self.__class__.__name__,
-                                repr(self.funcobj.__name__))
+                                repr(self._name))
 
 
 def pytest_pycollect_makeitem(collector, name, obj):

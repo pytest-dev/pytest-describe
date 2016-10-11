@@ -122,3 +122,7 @@ multiple "subjects" or "suts" (system under test).
 
         # the it_quacks test in this describe will fail (as expected)
 
+Fixtures defined in the block that includes the shared behavior take precedence
+over fixtures defined in the shared behavior. This rule only applies to
+fixtures, not to other functions (nested describe blocks and tests). Instead,
+they are all collected as separate tests.
