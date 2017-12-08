@@ -21,4 +21,4 @@ def test_verbose_output(testdir):
         'a_dir/test_a.py::describe_something::describe_nested_ok::passes PASSED',
     ]
     for line in expected:
-        assert line in result.outlines
+        assert any(l for l in result.outlines if l.startswith(line))

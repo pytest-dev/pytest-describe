@@ -15,6 +15,9 @@ def _collect_result(result):
     if lines[-1] == '':
         lines = lines[:-1]
 
+    # workaround for older versions of pytest not pluralizing correctly
+    lines = [l.replace(' 1 items', ' 1 item') for l in lines]
+
     return lines[-7:-2]
 
 
@@ -32,7 +35,7 @@ def test_collect_custom_prefix(testdir):
     result = testdir.runpytest('--collectonly')
     print(result.outlines)
     assert _collect_result(result) == [
-        "collected 1 items",
+        "collected 1 item",
         "<Module 'a_dir/test_a.py'>",
         "  <DescribeBlock 'foo_scope'>",
         "    <DescribeBlock 'bar_context'>",
