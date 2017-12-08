@@ -10,7 +10,7 @@ setup(
     author_email='robinpeder@gmail.com',
     license='MIT license',
     install_requires=[
-        'pytest>=2.6.0',
+        'pytest>=2.6.0, <=3.2.5',
     ],
     entry_points={
         'pytest11': [
