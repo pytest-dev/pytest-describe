@@ -1,10 +1,10 @@
 .. image:: https://travis-ci.org/ropez/pytest-describe.svg?branch=master
     :target: https://travis-ci.org/ropez/pytest-describe
 
-Describe-style plugin for py.test
-=================================
+Describe-style plugin for pytest
+================================
 
-pytest-describe is a plugin for py.test that allows tests to be written in
+pytest-describe is a plugin for pytest that allows tests to be written in
 arbitrary nested describe-blocks, similar to RSpec (Ruby) and Jasmine
 (JavaScript).
 
@@ -90,8 +90,16 @@ camel-case names for classes fit very well when testing functions in different
 cases. In addition, every test function must take a "self" argument that is
 never used.
 
+The pytest-describe plugin allows organizing your tests in the nicer way shown
+above using describe-blocks. The functions inside the describe-blocks need not
+follow any special naming convention, they are always executed as tests unless
+they start with an underscore. The functions used for describe-blocks must
+start with ``describe_``, but you can configure this prefix with the setting
+``describe_prefixes`` in the pytest configuration file.
+
+
 Shared Behaviors
-===============
+================
 
 If you've used rspec's shared examples or test class inheritance, then you may
 be familiar with the benefit of having the same tests apply to
