@@ -25,18 +25,19 @@ def test_collect(testdir):
     """))
 
     result = testdir.runpytest('--collectonly')
+    trimmed_result = list(map(lambda outline: outline.strip(), result.outlines))
     expected_lines = [
         "collected 4 items",
-        "  <DescribeBlock 'describe_something'>",
-        "    <Function 'is_foo'>",
-        "    <Function 'can_bar'>",
-        "  <DescribeBlock 'describe_something_else'>",
-        "    <DescribeBlock 'describe_nested'>",
-        "      <Function 'a_test'>",
-        "  <Function 'test_something'>",
+        "<DescribeBlock 'describe_something'>",
+        "<Function 'is_foo'>",
+        "<Function 'can_bar'>",
+        "<DescribeBlock 'describe_something_else'>",
+        "<DescribeBlock 'describe_nested'>",
+        "<Function 'a_test'>",
+        "<Function 'test_something'>",
     ]
     for line in expected_lines:
-        assert line in result.outlines
+        assert line in trimmed_result
 
 
 def test_describe_evaluated_once(testdir):
