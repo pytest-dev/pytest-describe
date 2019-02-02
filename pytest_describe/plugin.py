@@ -1,4 +1,3 @@
-import imp
 import sys
 import types
 from _pytest.python import PyCollector
@@ -25,7 +24,7 @@ def trace_function(funcobj, *args, **kwargs):
 
 def make_module_from_function(funcobj):
     """Evaluates the local scope of a function, as if it was a module"""
-    module = imp.new_module(funcobj.__name__)
+    module = types.ModuleType(funcobj.__name__)
 
     # Import shared behaviors into the generated module. We do this before
     # importing the direct children, so that fixtures in the block that's
@@ -57,34 +56,44 @@ def evaluate_shared_behavior(funcobj):
 
 
 def copy_markinfo(module, funcobj):
-    from _pytest.mark import MarkInfo
-
-    marks = {}
-    for name, val in funcobj.__dict__.items():
-        if isinstance(val, MarkInfo):
-            marks[name] = val
-
+    copy_deprecated_markinfo(module, funcobj)
     for obj in module.__dict__.values():
         if isinstance(obj, types.FunctionType):
-            for name, mark in marks.items():
-                setattr(obj, name, mark)
+            merge_pytestmark(obj, funcobj)
 
 
-def merge_pytestmark(module, parentobj):
+def copy_deprecated_markinfo(module, funcobj):
+    # For pytest < 3.6 we also need to copy MarkInfo properties
     try:
-        pytestmark = parentobj.pytestmark
-        if not isinstance(pytestmark, list):
-            pytestmark = [pytestmark]
-        try:
-            if isinstance(module.pytestmark, list):
-                pytestmark.extend(module.pytestmark)
-            else:
-                pytestmark.append(module.pytestmark)
-        except AttributeError:
-            pass
-        module.pytestmark = pytestmark
-    except AttributeError:
+        from _pytest.mark import MarkInfo
+
+        marks = {}
+        for name, val in funcobj.__dict__.items():
+            if isinstance(val, MarkInfo):
+                marks[name] = val
+
+        for obj in module.__dict__.values():
+            if isinstance(obj, types.FunctionType):
+                for name, mark in marks.items():
+                    setattr(obj, name, mark)
+    except ImportError:
         pass
+
+
+def merge_pytestmark(obj, parentobj):
+    marks = dict(pytestmark_dict(parentobj), **pytestmark_dict(obj))
+    if marks:
+        obj.pytestmark = list(marks.values())
+
+
+def pytestmark_dict(obj):
+    try:
+        marks = obj.pytestmark
+        if not isinstance(marks, list):
+            marks = [marks]
+        return {mark.name: mark for mark in marks}
+    except AttributeError:
+        return {}
 
 
 class DescribeBlock(PyCollector):
