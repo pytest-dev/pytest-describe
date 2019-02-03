@@ -1,4 +1,5 @@
 import py
+import re
 
 pytest_plugins = 'pytester'
 
@@ -6,19 +7,6 @@ ini = """
 [pytest]
 describe_prefixes = foo bar
 """
-
-
-def _collect_result(result):
-    lines = result.stdout.lines
-
-    # discard last line if empty
-    if lines[-1] == '':
-        lines = lines[:-1]
-
-    # workaround for older versions of pytest not pluralizing correctly
-    lines = [l.replace(' 1 items', ' 1 item') for l in lines]
-
-    return lines[-7:-2]
 
 
 def test_collect_custom_prefix(testdir):
@@ -34,10 +22,12 @@ def test_collect_custom_prefix(testdir):
 
     result = testdir.runpytest('--collectonly')
     print(result.outlines)
-    assert _collect_result(result) == [
-        "collected 1 item",
-        "<Module 'a_dir/test_a.py'>",
-        "  <DescribeBlock 'foo_scope'>",
-        "    <DescribeBlock 'bar_context'>",
-        "      <Function 'passes'>",
+    expected_lines = [
+        re.compile("collected 1 item(s)?"),
+        re.compile("\s*<Module (')?(a_dir/)?test_a.py(')?>"),
+        re.compile("\s*<DescribeBlock (')?foo_scope(')?>"),
+        re.compile("\s*<DescribeBlock (')?bar_context(')?>"),
+        re.compile("\s*<Function (')?passes(')?>"),
     ]
+    for line in expected_lines:
+        assert any([line.match(r) is not None for r in result.outlines])

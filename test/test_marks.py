@@ -47,6 +47,22 @@ def test_keywords(testdir):
     result = testdir.runpytest('-k', 'foo')
     assert_outcomes(result, passed=1, deselected=1)
 
+def test_marks(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+        def describe_a():
+            @pytest.mark.foo
+            def foo_test():
+                pass
+            @pytest.mark.bar
+            def bar_test():
+                pass
+    """))
+
+    result = testdir.runpytest('-m', 'foo')
+    assert_outcomes(result, passed=1, deselected=1)
+
 
 def test_module_marks(testdir):
     a_dir = testdir.mkpydir('a_dir')
@@ -60,7 +76,7 @@ def test_module_marks(testdir):
                     pass
     """))
 
-    result = testdir.runpytest('-k', 'foo')
+    result = testdir.runpytest('-m', 'foo')
     assert_outcomes(result, passed=1)
 
 
@@ -78,5 +94,5 @@ def test_mark_at_describe_function(testdir):
                 pass
     """))
 
-    result = testdir.runpytest('-k', 'foo')
+    result = testdir.runpytest('-m', 'foo')
     assert_outcomes(result, passed=2)
