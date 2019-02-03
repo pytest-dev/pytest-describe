@@ -26,15 +26,16 @@ def test_collect(testdir):
     """))
 
     result = testdir.runpytest('--collectonly')
-    expected_regex = map(lambda r: re.compile(r), [
-        "collected 4 item(s)?",
-        "\s*<DescribeBlock (')?describe_something(')?>",
-        "\s*<Function (')?is_foo(')?>",
-        "\s*<Function (')?can_bar(')?>",
-        "\s*<DescribeBlock (')?describe_something_else(')?>",
-        "\s*<DescribeBlock (')?describe_nested(')?>",
-        "\s*<Function (')?a_test(')?>",
-        "\s*<Function (')?test_something(')?>",
+
+    expected_regex = map(re.compile, [
+        r"collected 4 item(s)?",
+        r"\s*<DescribeBlock '?describe_something'?>",
+        r"\s*<Function '?is_foo'?>",
+        r"\s*<Function '?can_bar'?>",
+        r"\s*<DescribeBlock '?describe_something_else'?>",
+        r"\s*<DescribeBlock '?describe_nested'?>",
+        r"\s*<Function '?a_test'?>",
+        r"\s*<Function '?test_something'?>",
     ])
     for line in expected_regex:
         assert any([line.match(r) is not None for r in result.outlines])

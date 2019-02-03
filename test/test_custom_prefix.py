@@ -21,13 +21,12 @@ def test_collect_custom_prefix(testdir):
     """))
 
     result = testdir.runpytest('--collectonly')
-    print(result.outlines)
-    expected_lines = [
-        re.compile("collected 1 item(s)?"),
-        re.compile("\s*<Module (')?(a_dir/)?test_a.py(')?>"),
-        re.compile("\s*<DescribeBlock (')?foo_scope(')?>"),
-        re.compile("\s*<DescribeBlock (')?bar_context(')?>"),
-        re.compile("\s*<Function (')?passes(')?>"),
-    ]
+    expected_lines = map(re.compile, [
+        r"collected 1 item(s)?",
+        r"\s*<Module '?(a_dir/)?test_a.py'?>",
+        r"\s*<DescribeBlock '?foo_scope'?>",
+        r"\s*<DescribeBlock '?bar_context'?>",
+        r"\s*<Function '?passes'?>",
+    ])
     for line in expected_lines:
         assert any([line.match(r) is not None for r in result.outlines])
