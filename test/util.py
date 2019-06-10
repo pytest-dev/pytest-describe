@@ -3,7 +3,10 @@ def assert_outcomes(result, **expected):
     del o['seconds']
 
     try:
-        del o['pytest-warnings']
+        if 'warnings' in o:
+            del o['warnings']
+        if 'pytest-warnings' in o:
+            del o['pytest-warnings']
     except KeyError:
         pass
 
