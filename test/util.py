@@ -1,10 +1,8 @@
 def assert_outcomes(result, **expected):
-    o = result.parseoutcomes()
-    del o['seconds']
+    outcomes = result.parseoutcomes()
 
-    try:
-        del o['pytest-warnings']
-    except KeyError:
-        pass
+    for key in 'seconds', 'pytest-warnings', 'warnings', 'warning':
+        if key in outcomes:
+            del outcomes[key]
 
-    assert o == expected
+    assert outcomes == expected

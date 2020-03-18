@@ -47,6 +47,7 @@ def test_keywords(testdir):
     result = testdir.runpytest('-k', 'foo')
     assert_outcomes(result, passed=1, deselected=1)
 
+
 def test_marks(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""
