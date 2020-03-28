@@ -99,8 +99,9 @@ def pytestmark_dict(obj):
 class DescribeBlock(PyCollector):
     """Module-like object representing the scope of a describe block"""
 
-    def __init__(self, funcobj, parent):
-        super(DescribeBlock, self).__init__(funcobj.__name__, parent)
+    def __init__(self, *args, **kwargs):
+        funcobj = kwargs.pop('obj')
+        super(DescribeBlock, self).__init__(*args, **kwargs)
         self._name = getattr(funcobj, '_mangled_name', funcobj.__name__)
         self.funcobj = funcobj
 
@@ -146,7 +147,7 @@ def pytest_pycollect_makeitem(collector, name, obj):
     if isinstance(obj, types.FunctionType):
         for prefix in collector.config.getini('describe_prefixes'):
             if obj.__name__.startswith(prefix):
-                return DescribeBlock(obj, collector)
+                return DescribeBlock.from_parent(collector, name=obj.__name__, obj=obj)
 
 
 def pytest_addoption(parser):
