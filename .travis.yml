@@ -3,132 +3,86 @@ language: python
 matrix:
   include:
     - python: 2.7
-      env: TOX_ENV=py27-pytest_27
+      env: TOX_ENV=py27-pytest_2
     - python: 2.7
-      env: TOX_ENV=py27-pytest_28
+      env: TOX_ENV=py27-pytest_3
     - python: 2.7
-      env: TOX_ENV=py27-pytest_29
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_32
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_33
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_34
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_35
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_36
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_37
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_38
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_39
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_310
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_40
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_41
-    - python: 2.7
-      env: TOX_ENV=py27-pytest_latest
-    
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_27
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_28
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_29
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_32
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_33
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_34
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_35
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_36
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_37
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_38
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_39
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_310
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_40
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_41
-    - python: 3.4
-      env: TOX_ENV=py34-pytest_latest
-    
+      env: TOX_ENV=py27-pytest_4
+
     - python: 3.5
-      env: TOX_ENV=py35-pytest_27
+      env: TOX_ENV=py35-pytest_2
     - python: 3.5
-      env: TOX_ENV=py35-pytest_28
+      env: TOX_ENV=py35-pytest_3
     - python: 3.5
-      env: TOX_ENV=py35-pytest_29
+      env: TOX_ENV=py35-pytest_4
     - python: 3.5
-      env: TOX_ENV=py35-pytest_32
+      env: TOX_ENV=py35-pytest_50
     - python: 3.5
-      env: TOX_ENV=py35-pytest_33
+      env: TOX_ENV=py35-pytest_51
     - python: 3.5
-      env: TOX_ENV=py35-pytest_34
+      env: TOX_ENV=py35-pytest_52
     - python: 3.5
-      env: TOX_ENV=py35-pytest_35
+      env: TOX_ENV=py35-pytest_53
     - python: 3.5
-      env: TOX_ENV=py35-pytest_36
-    - python: 3.5
-      env: TOX_ENV=py35-pytest_37
-    - python: 3.5
-      env: TOX_ENV=py35-pytest_38
-    - python: 3.5
-      env: TOX_ENV=py35-pytest_39
-    - python: 3.5
-      env: TOX_ENV=py35-pytest_310
-    - python: 3.5
-      env: TOX_ENV=py35-pytest_40
-    - python: 3.5
-      env: TOX_ENV=py35-pytest_41
+      env: TOX_ENV=py35-pytest_54
     - python: 3.5
       env: TOX_ENV=py35-pytest_latest
-    
+
     - python: 3.6
-      env: TOX_ENV=py36-pytest_27
+      env: TOX_ENV=py36-pytest_2
     - python: 3.6
-      env: TOX_ENV=py36-pytest_28
+      env: TOX_ENV=py36-pytest_3
     - python: 3.6
-      env: TOX_ENV=py36-pytest_29
+      env: TOX_ENV=py36-pytest_4
     - python: 3.6
-      env: TOX_ENV=py36-pytest_32
+      env: TOX_ENV=py36-pytest_50
     - python: 3.6
-      env: TOX_ENV=py36-pytest_33
+      env: TOX_ENV=py36-pytest_51
     - python: 3.6
-      env: TOX_ENV=py36-pytest_34
+      env: TOX_ENV=py36-pytest_52
     - python: 3.6
-      env: TOX_ENV=py36-pytest_35
+      env: TOX_ENV=py36-pytest_53
     - python: 3.6
-      env: TOX_ENV=py36-pytest_36
-    - python: 3.6
-      env: TOX_ENV=py36-pytest_37
-    - python: 3.6
-      env: TOX_ENV=py36-pytest_38
-    - python: 3.6
-      env: TOX_ENV=py36-pytest_39
-    - python: 3.6
-      env: TOX_ENV=py36-pytest_310
-    - python: 3.6
-      env: TOX_ENV=py36-pytest_40
-    - python: 3.6
-      env: TOX_ENV=py36-pytest_41
+      env: TOX_ENV=py36-pytest_54
     - python: 3.6
       env: TOX_ENV=py36-pytest_latest
+
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_3
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_4
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_50
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_51
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_52
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_53
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_54
+    - python: 3.7
+      env: TOX_ENV=py37-pytest_latest
+
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_3
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_4
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_50
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_51
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_52
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_53
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_54
+    - python: 3.8
+      env: TOX_ENV=py38-pytest_latest
 
 install:
   - pip install tox
 
 script:
   - tox -e $TOX_ENV
-  
