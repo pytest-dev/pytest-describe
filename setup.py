@@ -1,10 +1,16 @@
 from setuptools import setup
 
 
+with open("README.rst") as readme_file:
+    readme = readme_file.read()
+
+
 setup(
     name='pytest-describe',
     version='0.12.0',
     description='Describe-style plugin for pytest',
+    long_description=readme,
+    long_description_content_type='text/x-rst',
     url='https://github.com/ropez/pytest-describe',
     author='Robin Pedersen',
     author_email='robinpeder@gmail.com',
