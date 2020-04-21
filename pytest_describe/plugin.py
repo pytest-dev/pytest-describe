@@ -11,7 +11,7 @@ def trace_function(funcobj, *args, **kwargs):
         # Activate local trace for first call only
         if frame.f_back.f_locals.get('_tracefunc') == _tracefunc:
             if event == 'return':
-                funclocals.update(frame.f_locals.copy())
+                funclocals.update(frame.f_locals)
 
     sys.setprofile(_tracefunc)
     try:
