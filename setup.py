@@ -7,7 +7,7 @@ with open("README.rst") as readme_file:
 
 setup(
     name='pytest-describe',
-    version='1.0.0',
+    version='2.0.0',
     description='Describe-style plugin for pytest',
     long_description=readme,
     long_description_content_type='text/x-rst',
@@ -16,7 +16,7 @@ setup(
     author_email='robinpeder@gmail.com',
     license='MIT license',
     install_requires=[
-        'pytest>=2.6.0',
+        'pytest>=4.0.0',
     ],
     entry_points={
         'pytest11': [
@@ -34,8 +34,6 @@ setup(
         'Topic :: Software Development :: Testing',
         'Topic :: Software Development :: Libraries',
         'Topic :: Utilities',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',

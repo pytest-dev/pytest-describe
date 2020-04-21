@@ -1,5 +1,4 @@
 import py
-import pytest
 from util import assert_outcomes
 
 pytest_plugins = 'pytester'
@@ -50,7 +49,6 @@ def test_cartesian_parametrize(testdir):
     assert_outcomes(result, passed=9)
 
 
-@pytest.mark.skipif("pytest.__version__.startswith('2.')")
 def test_parametrize_applies_to_describe(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""
@@ -125,7 +123,6 @@ def test_parametrize_with_shared(testdir):
     assert_outcomes(result, passed=6)
 
 
-@pytest.mark.skipif("pytest.__version__.startswith('2.')")
 def test_coincident_parametrize_at_top(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""

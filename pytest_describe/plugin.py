@@ -1,4 +1,3 @@
-import functools
 import sys
 import types
 from _pytest.python import PyCollector
