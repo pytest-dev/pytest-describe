@@ -31,6 +31,121 @@ def test_special_marks(testdir):
     assert_outcomes(result, passed=3, xfailed=1, xpassed=1, skipped=1)
 
 
+def test_cartesian_parametrize(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+
+        def describe_marks():
+
+            @pytest.mark.parametrize('foo', (1, 2, 3))
+            @pytest.mark.parametrize('bar', (1, 2, 3))
+            def isint(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=9)
+
+
+def test_parametrize_applies_to_describe(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        def describe_marks():
+
+            @pytest.mark.parametrize('bar', (1, 2, 3))
+            def isint(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+
+            def isint2(foo):
+                assert foo == int(foo)
+
+            def describe_nested():
+                def isint3(foo):
+                    assert foo == int(foo)
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=15)
+
+
+def test_cartesian_parametrize_on_describe(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        @pytest.mark.parametrize('bar', (1, 2, 3))
+        def describe_marks():
+
+            def isint(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=9)
+
+
+def test_parametrize_with_shared(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+        from pytest import fixture
+        from pytest_describe import behaves_like
+
+        def a_duck():
+            def it_quacks(sound):
+                assert sound == int(sound)
+
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        @behaves_like(a_duck)
+        def describe_something_that_quacks():
+            @fixture
+            def sound(foo):
+                return foo
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        @behaves_like(a_duck)
+        def describe_something_that_barks():
+            @fixture
+            def sound(foo):
+                return foo
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=6)
+
+
+def test_coincident_parametrize_at_top(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        def describe_marks():
+
+            @pytest.mark.parametrize('bar', (1, 2, 3))
+            def isint(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        def describe_marks2():
+            def isint2(foo):
+                assert foo == int(foo)
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=12)
+
+
 def test_keywords(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""

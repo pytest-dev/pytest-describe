@@ -1,3 +1,4 @@
+import functools
 import sys
 import types
 from _pytest.python import PyCollector
@@ -81,19 +82,31 @@ def copy_deprecated_markinfo(module, funcobj):
 
 
 def merge_pytestmark(obj, parentobj):
-    marks = dict(pytestmark_dict(parentobj), **pytestmark_dict(obj))
+    marks = pytestmarks(parentobj) + pytestmarks(obj)
     if marks:
-        obj.pytestmark = list(marks.values())
+
+        def reduce_marks(acc, mark):
+            name, mark = mark
+            if name == 'parametrize':
+                acc[(name, mark.args[0])] = mark
+            else:
+                acc[name] = mark
+            return acc
+
+        obj.pytestmark = list(functools.reduce(
+            reduce_marks,
+            marks,
+            {}).values())
 
 
-def pytestmark_dict(obj):
+def pytestmarks(obj):
     try:
         marks = obj.pytestmark
         if not isinstance(marks, list):
             marks = [marks]
-        return {mark.name: mark for mark in marks}
+        return [(mark.name, mark) for mark in marks]
     except AttributeError:
-        return {}
+        return []
 
 
 class DescribeBlock(PyCollector):
