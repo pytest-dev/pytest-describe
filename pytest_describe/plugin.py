@@ -82,31 +82,27 @@ def copy_deprecated_markinfo(module, funcobj):
 
 
 def merge_pytestmark(obj, parentobj):
-    marks = pytestmarks(parentobj) + pytestmarks(obj)
+    marks = dict(pytestmark_dict(parentobj))
+    marks.update(pytestmark_dict(obj))
     if marks:
-
-        def reduce_marks(acc, mark):
-            name, mark = mark
-            if name == 'parametrize':
-                acc[(name, mark.args[0])] = mark
-            else:
-                acc[name] = mark
-            return acc
-
-        obj.pytestmark = list(functools.reduce(
-            reduce_marks,
-            marks,
-            {}).values())
+        obj.pytestmark = list(marks.values())
 
 
-def pytestmarks(obj):
+def pytestmark_name(mark):
+    name = mark.name
+    if name == 'parametrize':
+        name += '-' + mark.args[0]
+    return name
+
+
+def pytestmark_dict(obj):
     try:
         marks = obj.pytestmark
         if not isinstance(marks, list):
             marks = [marks]
-        return [(mark.name, mark) for mark in marks]
+        return {pytestmark_name(mark): mark for mark in marks}
     except AttributeError:
-        return []
+        return {}
 
 
 class DescribeBlock(PyCollector):
