@@ -105,14 +105,7 @@ class DescribeBlock(PyCollector):
         return super().collect()
 
     def _getobj(self):
-        # In older versions of pytest, the python module collector used this
-        # memoizedcall function, but it was removed in newer versions. I'm not
-        # sure if this was ever necessary, but just trying to stay consistent
-        # with whatever pytest is doing, using a little bit of trial and error.
-        try:
-            return self._memoizedcall('_obj', self._importtestmodule)
-        except AttributeError:
-            return self._importtestmodule()
+        return self._importtestmodule()
 
     def _makeid(self):
         """Magic that makes fixtures local to each scope"""
