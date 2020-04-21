@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/ropez/pytest-describe.svg?branch=master
-    :target: https://travis-ci.org/ropez/pytest-describe
+.. image:: https://travis-ci.org/pytest-dev/pytest-describe.svg?branch=master
+    :target: https://travis-ci.org/pytest-dev/pytest-describe
 
 Describe-style plugin for pytest
 ================================
