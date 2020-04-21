@@ -11,7 +11,7 @@ setup(
     description='Describe-style plugin for pytest',
     long_description=readme,
     long_description_content_type='text/x-rst',
-    url='https://github.com/ropez/pytest-describe',
+    url='https://github.com/pytest-dev/pytest-describe',
     author='Robin Pedersen',
     author_email='robinpeder@gmail.com',
     license='MIT license',
