@@ -56,28 +56,9 @@ def evaluate_shared_behavior(funcobj):
 
 
 def copy_markinfo(module, funcobj):
-    copy_deprecated_markinfo(module, funcobj)
     for obj in module.__dict__.values():
         if isinstance(obj, types.FunctionType):
             merge_pytestmark(obj, funcobj)
-
-
-def copy_deprecated_markinfo(module, funcobj):
-    # For pytest < 3.6 we also need to copy MarkInfo properties
-    try:
-        from _pytest.mark import MarkInfo
-
-        marks = {}
-        for name, val in funcobj.__dict__.items():
-            if isinstance(val, MarkInfo):
-                marks[name] = val
-
-        for obj in module.__dict__.values():
-            if isinstance(obj, types.FunctionType):
-                for name, mark in marks.items():
-                    setattr(obj, name, mark)
-    except ImportError:
-        pass
 
 
 def merge_pytestmark(obj, parentobj):
