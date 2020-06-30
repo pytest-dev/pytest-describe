@@ -70,7 +70,10 @@ def merge_pytestmark(obj, parentobj):
 def pytestmark_name(mark):
     name = mark.name
     if name == 'parametrize':
-        name += '-' + mark.args[0]
+        argnames = mark.args[0]
+        if not isinstance(argnames, str):
+            argnames = ','.join(argnames)
+        name += '-' + argnames
     return name
 
 
