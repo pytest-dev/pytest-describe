@@ -31,6 +31,33 @@ def test_special_marks(testdir):
     assert_outcomes(result, passed=3, xfailed=1, xpassed=1, skipped=1)
 
 
+
+def test_multiple_variables_parametrize(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+
+        def describe_marks():
+            @pytest.mark.parametrize('foo,bar', [(1, 2), (3, 4)])
+            def isint_str_names(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+
+            @pytest.mark.parametrize(['foo', 'bar'], [(1, 2), (3, 4)])
+            def isint_list_names(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+
+            @pytest.mark.parametrize(('foo', 'bar'), [(1, 2), (3, 4)])
+            def isint_tuple_names(foo, bar):
+                assert foo == int(foo)
+                assert bar == int(bar)
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=6)
+
+
 def test_cartesian_parametrize(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""
