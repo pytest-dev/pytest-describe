@@ -47,6 +47,21 @@ matrix:
     - python: 3.8
       env: TOX_ENV=py38-pytest_latest
 
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_4
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_50
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_51
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_52
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_53
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_54
+    - python: 3.9
+      env: TOX_ENV=py39-pytest_latest
+
 install:
   - pip install tox
 
