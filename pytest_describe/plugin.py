@@ -55,38 +55,6 @@ def evaluate_shared_behavior(funcobj):
     return funcobj._shared_functions
 
 
-def copy_markinfo(module, funcobj):
-    for obj in module.__dict__.values():
-        if isinstance(obj, types.FunctionType):
-            merge_pytestmark(obj, funcobj)
-
-
-def merge_pytestmark(obj, parentobj):
-    marks = {**pytestmark_dict(parentobj), **pytestmark_dict(obj)}
-    if marks:
-        obj.pytestmark = list(marks.values())
-
-
-def pytestmark_name(mark):
-    name = mark.name
-    if name == 'parametrize':
-        argnames = mark.args[0]
-        if not isinstance(argnames, str):
-            argnames = ','.join(argnames)
-        name += '-' + argnames
-    return name
-
-
-def pytestmark_dict(obj):
-    try:
-        marks = obj.pytestmark
-        if not isinstance(marks, list):
-            marks = [marks]
-        return {pytestmark_name(mark): mark for mark in marks}
-    except AttributeError:
-        return {}
-
-
 class DescribeBlock(PyCollector):
     """Module-like object representing the scope of a describe block"""
 
@@ -117,8 +85,7 @@ class DescribeBlock(PyCollector):
     def _importtestmodule(self):
         """Import a describe block as if it was a module"""
         module = make_module_from_function(self.funcobj)
-        copy_markinfo(module, self.funcobj)
-        merge_pytestmark(module, self.parent.obj)
+        self.own_markers = getattr(self.funcobj, 'pytestmark', [])
         return module
 
     def funcnamefilter(self, name):

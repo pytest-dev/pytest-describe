@@ -31,7 +31,6 @@ def test_special_marks(testdir):
     assert_outcomes(result, passed=3, xfailed=1, xpassed=1, skipped=1)
 
 
-
 def test_multiple_variables_parametrize(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""
@@ -150,6 +149,39 @@ def test_parametrize_with_shared(testdir):
     assert_outcomes(result, passed=6)
 
 
+def test_parametrize_with_shared_but_different_values(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+        from pytest import fixture
+        from pytest_describe import behaves_like
+
+        def a_duck():
+            def it_quacks(sound):
+                assert sound[1] == int(sound[1])
+                assert sound[0] == 'bark' or sound[1] <= 3
+                assert sound[0] == 'quack' or sound[1] >= 4
+
+
+        @pytest.mark.parametrize('foo', (1, 2, 3))
+        @behaves_like(a_duck)
+        def describe_something_that_quacks():
+            @fixture
+            def sound(foo):
+                return ('quack', foo)
+
+        @pytest.mark.parametrize('foo', (4, 5, 6))
+        @behaves_like(a_duck)
+        def describe_something_that_barks():
+            @fixture
+            def sound(foo):
+                return ('bark', foo)
+    """))
+
+    result = testdir.runpytest()
+    assert_outcomes(result, passed=6)
+
+
 def test_coincident_parametrize_at_top(testdir):
     a_dir = testdir.mkpydir('a_dir')
     a_dir.join('test_a.py').write(py.code.Source("""
@@ -238,4 +270,31 @@ def test_mark_at_describe_function(testdir):
     """))
 
     result = testdir.runpytest('-m', 'foo')
+    assert_outcomes(result, passed=2)
+
+
+def test_mark_stacking(testdir):
+    a_dir = testdir.mkpydir('a_dir')
+    a_dir.join('test_a.py').write(py.code.Source("""
+        import pytest
+        @pytest.fixture()
+        def get_marks(request):
+            return [(mark.args[0], node.name) for node, mark
+                    in request.node.iter_markers_with_node(name='my_mark')]
+
+        @pytest.mark.my_mark('foo')
+        def describe_marks():
+            def it_is_inherited_from_describe_block(get_marks):
+                assert get_marks == [('foo', 'describe_marks')]
+
+            @pytest.mark.my_mark('bar')
+            @pytest.mark.my_mark('baz')
+            def all_marks_are_chained(get_marks):
+                assert get_marks == [
+                    ('baz', 'all_marks_are_chained'),
+                    ('bar', 'all_marks_are_chained'),
+                    ('foo', 'describe_marks')]
+    """))
+
+    result = testdir.runpytest()
     assert_outcomes(result, passed=2)
