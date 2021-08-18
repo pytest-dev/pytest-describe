@@ -2,9 +2,9 @@
     :target: https://pypi.org/project/pytest-describe/
     :alt: PyPI version
 
-.. image:: https://travis-ci.org/pytest-dev/pytest-describe.svg?branch=master
-    :target: https://travis-ci.org/pytest-dev/pytest-describe
-    :alt: Travis CI
+.. image:: https://github.com/pytest-dev/pytest-describe/actions/workflows/main.yml/badge.svg
+    :target: https://github.com/pytest-dev/pytest-describe/actions
+    :alt: Workflow status
 
 Describe-style plugin for pytest
 ================================
