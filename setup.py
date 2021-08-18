@@ -20,7 +20,7 @@ setup(
     ],
     entry_points={
         'pytest11': [
-            'pytest-describe = pytest_describe.plugin'
+            'pytest-describe = pytest_describe.plugin',
         ],
     },
     packages=['pytest_describe'],
@@ -38,5 +38,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 )
