@@ -58,6 +58,10 @@ jobs:
       if: matrix.python == 'pypy3'
       run: tox -e "pypy-pytest_{4,50,51,52,53,54,60,61,62,latest}"
 
+    - name: Linting with Flake8
+      if: matrix.python == '3.9'
+      run: tox -e flake8
+
   deploy:
     if: |
       github.event_name == 'push' &&

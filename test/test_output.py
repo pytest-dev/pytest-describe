@@ -17,8 +17,10 @@ def test_verbose_output(testdir):
 
     result = testdir.runpytest('-v')
     expected = [
-        'a_dir/test_a.py::describe_something::describe_nested_bad::fails FAILED',
-        'a_dir/test_a.py::describe_something::describe_nested_ok::passes PASSED',
+        'a_dir/test_a.py::describe_something::describe_nested_bad::'
+        'fails FAILED',
+        'a_dir/test_a.py::describe_something::describe_nested_ok::'
+        'passes PASSED',
     ]
     for line in expected:
         assert any(out for out in result.outlines if out.startswith(line))

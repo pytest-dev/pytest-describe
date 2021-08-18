@@ -89,7 +89,10 @@ class DescribeBlock(PyCollector):
         return module
 
     def funcnamefilter(self, name):
-        """Treat all nested functions as tests, without requiring the 'test_' prefix"""
+        """Treat all nested functions as tests
+
+        We do not require the 'test_' prefix for the specs.
+        """
         return not name.startswith('_')
 
     def classnamefilter(self, name):
