@@ -1,0 +1,89 @@
+name: main
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python: [3.6, 3.7, 3.8, 3.9, pypy3]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools
+        python -m pip install tox
+
+    - name: Test with Python 3.6
+      if: matrix.python == '3.6'
+      run: tox -e "py36-pytest_{4,50,51,52,53,54,60,61,62,latest}"
+
+    - name: Test with Python 3.7
+      if: matrix.python == '3.7'
+      run: tox -e "py37-pytest_{4,50,51,52,53,54,60,61,62,latest}"
+
+    - name: Test with Python 3.8
+      if: matrix.python == '3.8'
+      run: tox -e "py38-pytest_{4,50,51,52,53,54,60,61,62,latest}"
+
+    - name: Test with Python 3.9
+      if: matrix.python == '3.9'
+      run: tox -e "py39-pytest_{4,50,51,52,53,54,60,61,62,latest}"
+
+    - name: Test with Python 3.10
+      if: matrix.python == '3.10'
+      run: tox -e "py310-pytest_{62,latest}"
+
+    - name: Test with PyPy
+      if: matrix.python == 'pypy3'
+      run: tox -e "pypy-pytest_{4,50,51,52,53,54,60,61,62,latest}"
+
+  deploy:
+    if: |
+      github.event_name == 'push' &&
+      startsWith(github.event.ref, 'refs/tags') &&
+      github.repository == 'pytest-dev/pytest-describe'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade wheel setuptools setuptools_scm
+
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@v1.4.2
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_token }}
