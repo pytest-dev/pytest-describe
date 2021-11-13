@@ -3,10 +3,8 @@ import types
 import pytest
 
 
-PYTEST_GTE_7_0 = (
-    hasattr(pytest, 'version_tuple') and pytest.version_tuple >= (7, 0)
-)
-PYTEST_GTE_5_4 = hasattr(pytest.Collector, 'from_parent')
+PYTEST_GTE_7_0 = getattr(pytest, 'version_tuple', (0, 0)) >= (7, 0)
+PYTEST_GTE_5_4 = PYTEST_GTE_7_0 or hasattr(pytest.Collector, 'from_parent')
 
 
 def trace_function(funcobj, *args, **kwargs):
@@ -66,16 +64,15 @@ class DescribeBlock(pytest.Module):
 
     @classmethod
     def from_parent(cls, parent, obj):
+        """Construct a new node for the describe block"""
         name = getattr(obj, '_mangled_name', obj.__name__)
         nodeid = parent.nodeid + '::' + name
         if PYTEST_GTE_7_0:
             self = super().from_parent(
-                parent=parent, path=parent.path, nodeid=nodeid,
-            )
+                parent=parent, path=parent.path, nodeid=nodeid)
         elif PYTEST_GTE_5_4:
             self = super().from_parent(
-                parent=parent, fspath=parent.fspath, nodeid=nodeid,
-            )
+                parent=parent, fspath=parent.fspath, nodeid=nodeid)
         else:
             self = cls(parent=parent, fspath=parent.fspath, nodeid=nodeid)
         self.name = name
@@ -83,10 +80,12 @@ class DescribeBlock(pytest.Module):
         return self
 
     def collect(self):
+        """Get list of children"""
         self.session._fixturemanager.parsefactories(self)
         return super().collect()
 
     def _getobj(self):
+        """Get the underlying Python object"""
         return self._importtestmodule()
 
     def _importtestmodule(self):

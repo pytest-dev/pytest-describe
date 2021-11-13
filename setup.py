@@ -7,7 +7,7 @@ with open("README.rst") as readme_file:
 
 setup(
     name='pytest-describe',
-    version='2.0.0',
+    version='2.0.1',
     description='Describe-style plugin for pytest',
     long_description=readme,
     long_description_content_type='text/x-rst',
