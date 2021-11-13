@@ -1,6 +1,12 @@
 import sys
 import types
-from _pytest.python import PyCollector
+import pytest
+
+
+PYTEST_GTE_7_0 = (
+    hasattr(pytest, 'version_tuple') and pytest.version_tuple >= (7, 0)
+)
+PYTEST_GTE_5_4 = hasattr(pytest.Collector, 'from_parent')
 
 
 def trace_function(funcobj, *args, **kwargs):
@@ -55,19 +61,24 @@ def evaluate_shared_behavior(funcobj):
     return funcobj._shared_functions
 
 
-class DescribeBlock(PyCollector):
+class DescribeBlock(pytest.Module):
     """Module-like object representing the scope of a describe block"""
 
     @classmethod
     def from_parent(cls, parent, obj):
-        name = obj.__name__
-        try:
-            from_parent_super = super().from_parent
-        except AttributeError:  # PyTest < 5.4
-            self = cls(name, parent)
+        name = getattr(obj, '_mangled_name', obj.__name__)
+        nodeid = parent.nodeid + '::' + name
+        if PYTEST_GTE_7_0:
+            self = super().from_parent(
+                parent=parent, path=parent.path, nodeid=nodeid,
+            )
+        elif PYTEST_GTE_5_4:
+            self = super().from_parent(
+                parent=parent, fspath=parent.fspath, nodeid=nodeid,
+            )
         else:
-            self = from_parent_super(parent, name=name)
-        self._name = getattr(obj, '_mangled_name', name)
+            self = cls(parent=parent, fspath=parent.fspath, nodeid=nodeid)
+        self.name = name
         self.funcobj = obj
         return self
 
@@ -77,10 +88,6 @@ class DescribeBlock(PyCollector):
 
     def _getobj(self):
         return self._importtestmodule()
-
-    def _makeid(self):
-        """Magic that makes fixtures local to each scope"""
-        return f'{self.parent.nodeid}::{self._name}'
 
     def _importtestmodule(self):
         """Import a describe block as if it was a module"""
@@ -100,7 +107,7 @@ class DescribeBlock(PyCollector):
         return False
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self._name!r}>"
+        return f"<{self.__class__.__name__} {self.name!r}>"
 
 
 def pytest_pycollect_makeitem(collector, name, obj):
