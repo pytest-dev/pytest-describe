@@ -1,5 +1,6 @@
 include README.rst
 include LICENSE
 include setup.py
+include setup.cfg
 include tox.ini
 include test/*.py
