@@ -13,11 +13,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python: ['3.7', '3.8', '3.9', '3.10', 'py3.11', 'pypy3.9']
+        python: ['3.7', '3.8', '3.9', '3.10', '3.11', 'pypy3.9']
 
     steps:
     - uses: actions/checkout@v3
@@ -36,31 +36,31 @@ jobs:
 
     - name: Test with Python 3.7
       if: matrix.python == '3.7'
-      run: tox -e 'py37-pytest{4,5,60,61,62,70,71,72,73}'
+      run: tox run -x "tox.envlist=py37-pytest{4,5,60,61,62,70,71,72,73}"
 
     - name: Test with Python 3.8
       if: matrix.python == '3.8'
-      run: tox -e 'py38-pytest{4,5,60,61,62,70,71,72,73}'
+      run: tox run -x "tox.envlist=py38-pytest{4,5,60,61,62,70,71,72,73}"
 
     - name: Test with Python 3.9
       if: matrix.python == '3.9'
-      run: tox -e 'py39-pytest{4,5,60,61,62,70,71,72,73}'
+      run: tox run -x "tox.envlist=py39-pytest{4,5,60,61,62,70,71,72,73}"
 
     - name: Test with Python 3.10
       if: matrix.python == '3.10'
-      run: tox -e 'py310-pytest{62,70,71,72,73}'
+      run: tox run -x "tox.envlist=py310-pytest{62,70,71,72,73}"
 
     - name: Test with Python 3.11
       if: matrix.python == '3.11'
-      run: tox -e 'py311-pytest{73}'
+      run: tox run -x "tox.envlist=spy311-pytest{73}"
 
     - name: Test with PyPy 3.9
       if: matrix.python == 'pypy3.9'
-      run: tox -e 'pypy39-pytest{4,5,60,61,62,70,71,72,73}'
+      run: tox run -x "tox.envlist=pypy39-pytest{4,5,60,61,62,70,71,72,73}"
 
     - name: Linting with Flake8
       if: matrix.python == '3.10'
-      run: tox -e flake8
+      run: tox run -e flake8
 
   deploy:
     if: |

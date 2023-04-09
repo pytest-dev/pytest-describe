@@ -1,13 +1,9 @@
-import re
-
-from util import assert_outcomes, Source
-
-pytest_plugins = 'pytester'
+"""Test collection of test functions"""
 
 
-def test_collect(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+def test_collect_only(testdir):
+    testdir.makepyfile(
+        """
         def describe_something():
             def is_foo():
                 pass
@@ -23,27 +19,28 @@ def test_collect(testdir):
             pass
         def test_something():
             pass
-    """))
+        """)
 
     result = testdir.runpytest('--collectonly')
+    result.assert_outcomes()
 
-    expected_regex = map(re.compile, [
-        r"collected 4 item(s)?",
-        r"\s*<DescribeBlock '?describe_something'?>",
-        r"\s*<Function '?is_foo'?>",
-        r"\s*<Function '?can_bar'?>",
-        r"\s*<DescribeBlock '?describe_something_else'?>",
-        r"\s*<DescribeBlock '?describe_nested'?>",
-        r"\s*<Function '?a_test'?>",
-        r"\s*<Function '?test_something'?>",
-    ])
-    for line in expected_regex:
-        assert any([line.match(r) is not None for r in result.outlines])
+    output = '\n'.join(filter(None, result.outlines))
+    assert """
+collected 4 items
+<Module test_collect_only.py>
+  <DescribeBlock 'describe_something'>
+    <Function is_foo>
+    <Function can_bar>
+  <DescribeBlock 'describe_something_else'>
+    <DescribeBlock 'describe_nested'>
+      <Function a_test>
+  <Function test_something>
+""" in output
 
 
 def test_describe_evaluated_once(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         count = 0
         def describe_is_evaluated_only_once():
             global count
@@ -55,7 +52,7 @@ def test_describe_evaluated_once(testdir):
             def describe_nested():
                 def three():
                     assert count == 1
-    """))
+    """)
 
     result = testdir.runpytest('-v')
-    assert_outcomes(result, passed=3)
+    result.assert_outcomes(passed=3)

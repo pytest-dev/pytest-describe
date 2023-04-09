@@ -1,11 +1,9 @@
-from util import Source
-
-pytest_plugins = 'pytester'
+"""Test verbose output"""
 
 
 def test_verbose_output(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         def describe_something():
             def describe_nested_ok():
                 def passes():
@@ -13,14 +11,20 @@ def test_verbose_output(testdir):
             def describe_nested_bad():
                 def fails():
                     assert False
-    """))
+        """
+    )
 
-    result = testdir.runpytest('-v')
-    expected = [
-        'a_dir/test_a.py::describe_something::describe_nested_bad::'
-        'fails FAILED',
-        'a_dir/test_a.py::describe_something::describe_nested_ok::'
-        'passes PASSED',
+    result = testdir.runpytest("-v")
+
+    result.assert_outcomes(passed=1, failed=1)
+
+    output = [
+        ' '.join(line.split('::', 2)[2].split())
+        for line in result.outlines
+        if line.startswith('test_verbose_output.py::describe_something::')
     ]
-    for line in expected:
-        assert any(out for out in result.outlines if out.startswith(line))
+
+    assert output == [
+        "describe_nested_ok::passes PASSED [ 50%]",
+        "describe_nested_bad::fails FAILED [100%]",
+    ]

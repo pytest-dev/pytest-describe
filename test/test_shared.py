@@ -1,11 +1,9 @@
-from util import assert_outcomes, Source
-
-pytest_plugins = 'pytester'
+"""Test shared behaviors"""
 
 
-def test_shared_behavior(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+def test_shared_behaviors(testdir):
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -24,15 +22,15 @@ def test_shared_behavior(testdir):
             @fixture
             def sound():
                 return "bark"
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, failed=1, passed=1)
+    result.assert_outcomes(failed=1, passed=1)
 
 
 def test_multiple_shared_behaviors(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -60,15 +58,15 @@ def test_multiple_shared_behaviors(testdir):
                 @fixture
                 def sound():
                     return "bark"
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, failed=1, passed=3)
+    result.assert_outcomes(failed=1, passed=3)
 
 
 def test_fixture(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -83,15 +81,15 @@ def test_fixture(testdir):
         @behaves_like(a_duck)
         def describe_a_normal_duck():
             pass
-    """))
+        """)
 
     result = testdir.runpytest('-v')
-    assert_outcomes(result, passed=1)
+    result.assert_outcomes(passed=1)
 
 
 def test_override_fixture(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -108,15 +106,15 @@ def test_override_fixture(testdir):
             @fixture
             def sound():
                 return "bark"
-    """))
+        """)
 
     result = testdir.runpytest('-v')
-    assert_outcomes(result, failed=1)
+    result.assert_outcomes(failed=1)
 
 
 def test_name_mangling(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -130,15 +128,15 @@ def test_name_mangling(testdir):
             foo = 4242
             def it_does_something():
                 assert foo == 4242
-    """))
+        """)
 
     result = testdir.runpytest('-v')
-    assert_outcomes(result, passed=2)
+    result.assert_outcomes(passed=2)
 
 
 def test_nested_name_mangling(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -159,15 +157,15 @@ def test_nested_name_mangling(testdir):
             def describe_thing():
                 def it_does_something():
                     pass
-    """))
+        """)
 
     result = testdir.runpytest('-v')
-    assert_outcomes(result, passed=5)
+    result.assert_outcomes(passed=5)
 
 
 def test_evaluated_once(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(Source("""
+    testdir.makepyfile(
+        """
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -184,7 +182,7 @@ def test_evaluated_once(testdir):
         @behaves_like(thing)
         def describe_something_else():
             pass
-    """))
+        """)
 
     result = testdir.runpytest('-v')
-    assert_outcomes(result, passed=2)
+    result.assert_outcomes(passed=2)

@@ -1,11 +1,18 @@
-from util import assert_outcomes, Source
+"""Test mark decorator"""
 
-pytest_plugins = 'pytester'
+
+def assert_outcomes(result, **kwargs):
+    """Get all relevant outcomes"""
+    assert {
+        key: value
+        for key, value in result.parseoutcomes().items()
+        if key != 'seconds'
+    } == kwargs  # pragma: no cover
 
 
 def test_special_marks(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
 
         def describe_marks():
@@ -24,15 +31,15 @@ def test_special_marks(testdir):
             @pytest.mark.parametrize('foo', (1, 2, 3))
             def isint(foo):
                 assert foo == int(foo)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=3, xfailed=1, xpassed=1, skipped=1)
+    result.assert_outcomes(passed=3, xfailed=1, xpassed=1, skipped=1)
 
 
 def test_multiple_variables_parametrize(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
 
         def describe_marks():
@@ -50,15 +57,15 @@ def test_multiple_variables_parametrize(testdir):
             def isint_tuple_names(foo, bar):
                 assert foo == int(foo)
                 assert bar == int(bar)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=6)
+    result.assert_outcomes(passed=6)
 
 
 def test_cartesian_parametrize(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
 
         def describe_marks():
@@ -68,15 +75,15 @@ def test_cartesian_parametrize(testdir):
             def isint(foo, bar):
                 assert foo == int(foo)
                 assert bar == int(bar)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=9)
+    result.assert_outcomes(passed=9)
 
 
 def test_parametrize_applies_to_describe(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
 
         @pytest.mark.parametrize('foo', (1, 2, 3))
@@ -93,15 +100,15 @@ def test_parametrize_applies_to_describe(testdir):
             def describe_nested():
                 def isint3(foo):
                     assert foo == int(foo)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=15)
+    result.assert_outcomes(passed=15)
 
 
 def test_cartesian_parametrize_on_describe(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
 
         @pytest.mark.parametrize('foo', (1, 2, 3))
@@ -111,15 +118,15 @@ def test_cartesian_parametrize_on_describe(testdir):
             def isint(foo, bar):
                 assert foo == int(foo)
                 assert bar == int(bar)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=9)
+    result.assert_outcomes(passed=9)
 
 
 def test_parametrize_with_shared(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
         from pytest import fixture
         from pytest_describe import behaves_like
@@ -142,15 +149,15 @@ def test_parametrize_with_shared(testdir):
             @fixture
             def sound(foo):
                 return foo
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=6)
+    result.assert_outcomes(passed=6)
 
 
 def test_parametrize_with_shared_but_different_values(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
         from pytest import fixture
         from pytest_describe import behaves_like
@@ -175,15 +182,15 @@ def test_parametrize_with_shared_but_different_values(testdir):
             @fixture
             def sound(foo):
                 return ('bark', foo)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=6)
+    result.assert_outcomes(passed=6)
 
 
 def test_coincident_parametrize_at_top(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
 
         @pytest.mark.parametrize('foo', (1, 2, 3))
@@ -198,32 +205,41 @@ def test_coincident_parametrize_at_top(testdir):
         def describe_marks2():
             def isint2(foo):
                 assert foo == int(foo)
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=12)
+    result.assert_outcomes(passed=12)
 
 
 def test_keywords(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
         def describe_a():
-            @pytest.mark.foo
             def foo_test():
                 pass
-            @pytest.mark.bar
             def bar_test():
                 pass
-    """))
+        """)
 
     result = testdir.runpytest('-k', 'foo')
-    assert_outcomes(result, passed=1, deselected=1)
+    try:
+        result.assert_outcomes(passed=1, deselected=1)
+    except TypeError:  # pragma: no cover pytest < 7.0
+        assert_outcomes(result, passed=1, deselected=1)
 
 
-def test_marks(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+def test_custom_markers(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        markers =
+          foo
+          bar
+        """)
+
+    testdir.makepyfile(
+        """
         import pytest
         def describe_a():
             @pytest.mark.foo
@@ -232,15 +248,18 @@ def test_marks(testdir):
             @pytest.mark.bar
             def bar_test():
                 pass
-    """))
+        """)
 
     result = testdir.runpytest('-m', 'foo')
-    assert_outcomes(result, passed=1, deselected=1)
+    try:
+        result.assert_outcomes(passed=1, deselected=1)
+    except TypeError:  # pragma: no cover pytest < 7.0
+        assert_outcomes(result, passed=1, deselected=1)
 
 
 def test_module_marks(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
         pytestmark = [ pytest.mark.foo ]
         def describe_a():
@@ -248,15 +267,15 @@ def test_module_marks(testdir):
             def describe_b():
                 def a_test():
                     pass
-    """))
+        """)
 
     result = testdir.runpytest('-m', 'foo')
-    assert_outcomes(result, passed=1)
+    result.assert_outcomes(passed=1)
 
 
 def test_mark_at_describe_function(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
         @pytest.mark.foo
         def describe_foo():
@@ -266,15 +285,15 @@ def test_mark_at_describe_function(testdir):
             @pytest.mark.bar
             def b_test():
                 pass
-    """))
+        """)
 
     result = testdir.runpytest('-m', 'foo')
-    assert_outcomes(result, passed=2)
+    result.assert_outcomes(passed=2)
 
 
 def test_mark_stacking(testdir):
-    a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(Source("""
+    testdir.makepyfile(
+        """
         import pytest
         @pytest.fixture()
         def get_marks(request):
@@ -293,7 +312,7 @@ def test_mark_stacking(testdir):
                     ('baz', 'all_marks_are_chained'),
                     ('bar', 'all_marks_are_chained'),
                     ('foo', 'describe_marks')]
-    """))
+        """)
 
     result = testdir.runpytest()
-    assert_outcomes(result, passed=2)
+    result.assert_outcomes(passed=2)
