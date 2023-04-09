@@ -62,6 +62,10 @@ jobs:
       if: matrix.python == '3.10'
       run: tox run -e flake8
 
+    - name: Ensure full coverage
+      if: matrix.python == '3.10'
+      run: tox run -e coverage
+
   deploy:
     if: |
       github.event_name == 'push' &&
