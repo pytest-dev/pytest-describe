@@ -1,12 +1,11 @@
-import py
-from util import assert_outcomes
+from util import assert_outcomes, Source
 
 pytest_plugins = 'pytester'
 
 
 def test_shared_behavior(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -33,7 +32,7 @@ def test_shared_behavior(testdir):
 
 def test_multiple_shared_behaviors(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -69,7 +68,7 @@ def test_multiple_shared_behaviors(testdir):
 
 def test_fixture(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -92,7 +91,7 @@ def test_fixture(testdir):
 
 def test_override_fixture(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -117,7 +116,7 @@ def test_override_fixture(testdir):
 
 def test_name_mangling(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -139,7 +138,7 @@ def test_name_mangling(testdir):
 
 def test_nested_name_mangling(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 
@@ -168,7 +167,7 @@ def test_nested_name_mangling(testdir):
 
 def test_evaluated_once(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         from pytest import fixture
         from pytest_describe import behaves_like
 

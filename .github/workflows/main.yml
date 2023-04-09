@@ -13,11 +13,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        python: ['3.6', '3.7', '3.8', '3.9', '3.10', 'pypy3.9']
+        python: ['3.7', '3.8', '3.9', '3.10', 'py3.11', 'pypy3.9']
 
     steps:
     - uses: actions/checkout@v3
@@ -32,34 +32,34 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools
-        python -m pip install 'tox>=3.28,<4.0'
-
-    - name: Test with Python 3.6
-      if: matrix.python == '3.6'
-      run: tox -e 'py36-pytest{4,50,51,52,53,54,60,61,62,70}'
+        python -m pip install 'tox>=4.4,<5'
 
     - name: Test with Python 3.7
       if: matrix.python == '3.7'
-      run: tox -e 'py37-pytest{4,50,51,52,53,54,60,61,62,70}'
+      run: tox -e 'py37-pytest{4,5,60,61,62,70,71,72,73}'
 
     - name: Test with Python 3.8
       if: matrix.python == '3.8'
-      run: tox -e 'py38-pytest{4,50,51,52,53,54,60,61,62,70}'
+      run: tox -e 'py38-pytest{4,5,60,61,62,70,71,72,73}'
 
     - name: Test with Python 3.9
       if: matrix.python == '3.9'
-      run: tox -e 'py39-pytest{4,50,51,52,53,54,60,61,62,70}'
+      run: tox -e 'py39-pytest{4,5,60,61,62,70,71,72,73}'
 
     - name: Test with Python 3.10
       if: matrix.python == '3.10'
-      run: tox -e 'py310-pytest{62,70}'
+      run: tox -e 'py310-pytest{62,70,71,72,73}'
+
+    - name: Test with Python 3.11
+      if: matrix.python == '3.11'
+      run: tox -e 'py311-pytest{73}'
 
     - name: Test with PyPy 3.9
       if: matrix.python == 'pypy3.9'
-      run: tox -e 'pypy39-pytest{4,50,51,52,53,54,60,61,62,70}'
+      run: tox -e 'pypy39-pytest{4,5,60,61,62,70,71,72,73}'
 
     - name: Linting with Flake8
-      if: matrix.python == '3.9'
+      if: matrix.python == '3.10'
       run: tox -e flake8
 
   deploy:
@@ -76,7 +76,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |

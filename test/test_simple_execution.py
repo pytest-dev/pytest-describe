@@ -1,12 +1,11 @@
-import py
-from util import assert_outcomes
+from util import assert_outcomes, Source
 
 pytest_plugins = 'pytester'
 
 
 def test_can_pass(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         def describe_something():
             def passes():
                 assert True
@@ -21,7 +20,7 @@ def test_can_pass(testdir):
 
 def test_can_fail(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         def describe_something():
             def fails():
                 assert False
@@ -36,7 +35,7 @@ def test_can_fail(testdir):
 
 def test_can_fail_and_pass(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         def describe_something():
             def describe_nested_ok():
                 def passes():

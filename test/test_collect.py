@@ -1,14 +1,13 @@
-import py
 import re
 
-from util import assert_outcomes
+from util import assert_outcomes, Source
 
 pytest_plugins = 'pytester'
 
 
 def test_collect(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         def describe_something():
             def is_foo():
                 pass
@@ -44,7 +43,7 @@ def test_collect(testdir):
 
 def test_describe_evaluated_once(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_something.py').write(py.code.Source("""
+    a_dir.join('test_something.py').write(Source("""
         count = 0
         def describe_is_evaluated_only_once():
             global count

@@ -1,11 +1,11 @@
-import py
+from util import Source
 
 pytest_plugins = 'pytester'
 
 
 def test_verbose_output(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         def describe_something():
             def describe_nested_ok():
                 def passes():

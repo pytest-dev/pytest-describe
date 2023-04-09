@@ -1,12 +1,11 @@
-import py
-from util import assert_outcomes
+from util import assert_outcomes, Source
 
 pytest_plugins = 'pytester'
 
 
 def test_special_marks(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
 
         def describe_marks():
@@ -33,7 +32,7 @@ def test_special_marks(testdir):
 
 def test_multiple_variables_parametrize(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
 
         def describe_marks():
@@ -59,7 +58,7 @@ def test_multiple_variables_parametrize(testdir):
 
 def test_cartesian_parametrize(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
 
         def describe_marks():
@@ -77,7 +76,7 @@ def test_cartesian_parametrize(testdir):
 
 def test_parametrize_applies_to_describe(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
 
         @pytest.mark.parametrize('foo', (1, 2, 3))
@@ -102,7 +101,7 @@ def test_parametrize_applies_to_describe(testdir):
 
 def test_cartesian_parametrize_on_describe(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
 
         @pytest.mark.parametrize('foo', (1, 2, 3))
@@ -120,7 +119,7 @@ def test_cartesian_parametrize_on_describe(testdir):
 
 def test_parametrize_with_shared(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         from pytest import fixture
         from pytest_describe import behaves_like
@@ -151,7 +150,7 @@ def test_parametrize_with_shared(testdir):
 
 def test_parametrize_with_shared_but_different_values(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         from pytest import fixture
         from pytest_describe import behaves_like
@@ -184,7 +183,7 @@ def test_parametrize_with_shared_but_different_values(testdir):
 
 def test_coincident_parametrize_at_top(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
 
         @pytest.mark.parametrize('foo', (1, 2, 3))
@@ -207,7 +206,7 @@ def test_coincident_parametrize_at_top(testdir):
 
 def test_keywords(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         def describe_a():
             @pytest.mark.foo
@@ -224,7 +223,7 @@ def test_keywords(testdir):
 
 def test_marks(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         def describe_a():
             @pytest.mark.foo
@@ -241,7 +240,7 @@ def test_marks(testdir):
 
 def test_module_marks(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         pytestmark = [ pytest.mark.foo ]
         def describe_a():
@@ -257,7 +256,7 @@ def test_module_marks(testdir):
 
 def test_mark_at_describe_function(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         @pytest.mark.foo
         def describe_foo():
@@ -275,7 +274,7 @@ def test_mark_at_describe_function(testdir):
 
 def test_mark_stacking(testdir):
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         import pytest
         @pytest.fixture()
         def get_marks(request):

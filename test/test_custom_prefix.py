@@ -1,5 +1,6 @@
-import py
 import re
+
+from util import Source
 
 pytest_plugins = 'pytester'
 
@@ -13,7 +14,7 @@ def test_collect_custom_prefix(testdir):
     testdir.makeini(ini)
 
     a_dir = testdir.mkpydir('a_dir')
-    a_dir.join('test_a.py').write(py.code.Source("""
+    a_dir.join('test_a.py').write(Source("""
         def foo_scope():
             def bar_context():
                 def passes():
