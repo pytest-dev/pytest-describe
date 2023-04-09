@@ -1,3 +1,5 @@
+"""The pytest-describe plugin"""
+
 import sys
 import types
 import pytest
@@ -7,44 +9,47 @@ PYTEST_GTE_7_0 = getattr(pytest, 'version_tuple', (0, 0)) >= (7, 0)
 PYTEST_GTE_5_4 = PYTEST_GTE_7_0 or hasattr(pytest.Collector, 'from_parent')
 
 
-def trace_function(funcobj, *args, **kwargs):
-    """Call a function, and return its locals"""
-    funclocals = {}
+def trace_function(func, *args, **kwargs):  # pragma: no-cover
+    """Call a function and return its locals."""
+    f_locals = {}
 
-    def _tracefunc(frame, event, arg):
+    def _trace_func(frame, event, arg):  # pragma: no cover
         # Activate local trace for first call only
-        if frame.f_back.f_locals.get('_tracefunc') == _tracefunc:
-            if event == 'return':
-                funclocals.update(frame.f_locals)
+        if (frame.f_back.f_locals.get('_trace_func') == _trace_func
+                and event == 'return'):
+            f_locals.update(frame.f_locals)
 
-    sys.setprofile(_tracefunc)
+    sys.setprofile(_trace_func)
     try:
-        funcobj(*args, **kwargs)
+        func(*args, **kwargs)
     finally:
         sys.setprofile(None)
 
-    return funclocals
+    return f_locals
 
 
-def make_module_from_function(funcobj):
-    """Evaluates the local scope of a function, as if it was a module"""
-    module = types.ModuleType(funcobj.__name__)
+def make_module_from_function(func):
+    """Evaluate the local scope of a function as if it was a module."""
+    module = types.ModuleType(func.__name__)
 
     # Import shared behaviors into the generated module. We do this before
     # importing the direct children, so that fixtures in the block that's
     # importing the behavior take precedence.
-    for shared_funcobj in getattr(funcobj, '_behaves_like', []):
-        module.__dict__.update(evaluate_shared_behavior(shared_funcobj))
+    for shared_func in getattr(func, '_behaves_like', []):
+        module.__dict__.update(evaluate_shared_behavior(shared_func))
 
     # Import children
-    module.__dict__.update(trace_function(funcobj))
+    module.__dict__.update(trace_function(func))
     return module
 
 
-def evaluate_shared_behavior(funcobj):
-    if not hasattr(funcobj, '_shared_functions'):
-        funcobj._shared_functions = {}
-        for name, obj in trace_function(funcobj).items():
+def evaluate_shared_behavior(func):
+    """Evaluate the local scope of a function."""
+    try:
+        shared_functions = func._shared_functions
+    except AttributeError:
+        shared_functions = {}
+        for name, obj in trace_function(func).items():
             # Only functions are relevant here
             if not isinstance(obj, types.FunctionType):
                 continue
@@ -53,10 +58,11 @@ def evaluate_shared_behavior(funcobj):
             # want fixtures to be overridden in the block that's importing the
             # behavior.
             if not hasattr(obj, '_pytestfixturefunction'):
-                name = obj._mangled_name = f"{funcobj.__name__}::{name}"
+                name = obj._mangled_name = f"{func.__name__}::{name}"
 
-            funcobj._shared_functions[name] = obj
-    return funcobj._shared_functions
+            shared_functions[name] = obj
+        func._shared_functions = shared_functions
+    return shared_functions
 
 
 class DescribeBlock(pytest.Module):
@@ -70,10 +76,10 @@ class DescribeBlock(pytest.Module):
         if PYTEST_GTE_7_0:
             self = super().from_parent(
                 parent=parent, path=parent.path, nodeid=nodeid)
-        elif PYTEST_GTE_5_4:
+        elif PYTEST_GTE_5_4:  # pragma: no cover
             self = super().from_parent(
                 parent=parent, fspath=parent.fspath, nodeid=nodeid)
-        else:
+        else:  # pragma: no cover
             self = cls(parent=parent, fspath=parent.fspath, nodeid=nodeid)
         self.name = name
         self.funcobj = obj
@@ -110,6 +116,7 @@ class DescribeBlock(pytest.Module):
 
 
 def pytest_pycollect_makeitem(collector, name, obj):
+    """Collector items from describe blocks."""
     if isinstance(obj, types.FunctionType):
         for prefix in collector.config.getini('describe_prefixes'):
             if obj.__name__.startswith(prefix):
@@ -117,5 +124,6 @@ def pytest_pycollect_makeitem(collector, name, obj):
 
 
 def pytest_addoption(parser):
+    """Add configuration option describe_prefixes."""
     parser.addini("describe_prefixes", type="args", default=("describe",),
                   help="prefixes for Python describe function discovery")
