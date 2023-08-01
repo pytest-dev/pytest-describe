@@ -24,8 +24,19 @@ You guessed it::
     pip install pytest-describe
 
 
-Example
+Usage
 -------
+
+Pytest will automatically find the plugin and use it when you run pytest. 
+Running pytest will show that the plugin is loaded:
+
+.. code-block:: shell
+    $ pytest 
+    ...
+    plugins: describe-2.1.0
+    ...
+
+Tests can now be written in describe-blocks:
 
 .. code-block:: python
 
@@ -51,6 +62,31 @@ Example
             def removes_item_from_list(list):
                 list.remove('foo')
                 assert list == ['bar']
+
+The default prefix for describe-blocks is ``describe_``, but you can configure it 
+in the pytest/python configuration file via ``describe_prefixes`` or via the command 
+line option ``--describe-prefixes``.
+
+For example in your ``pyproject.toml``:
+
+.. code-block:: toml
+    
+    [tool.pytest.ini_options]
+    describe_prefixes = ["custom_prefix_"]
+
+Functions prefixed with ``_`` in the describe-block are not collected as tests. 
+This can be used to group helper functions.
+
+.. code-block:: python
+
+    def describe_function():
+
+        def _helper():
+            return "something"
+
+        def it_does_something():
+            value = _helper()
+            ...
 
 
 Why bother?
@@ -98,9 +134,7 @@ never used.
 The pytest-describe plugin allows organizing your tests in the nicer way shown
 above using describe-blocks. The functions inside the describe-blocks need not
 follow any special naming convention, they are always executed as tests unless
-they start with an underscore. The functions used for describe-blocks must
-start with ``describe_``, but you can configure this prefix with the setting
-``describe_prefixes`` in the pytest configuration file.
+they start with an underscore.
 
 
 Shared Behaviors
