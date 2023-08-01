@@ -75,7 +75,8 @@ For example in your ``pyproject.toml``:
     describe_prefixes = ["custom_prefix_"]
 
 Functions prefixed with ``_`` in the describe-block are not collected as tests. 
-This can be used to group helper functions.
+This can be used to group helper functions. Otherwise functions inside the 
+describe-blocks need not follow any special naming convention.
 
 .. code-block:: python
 
@@ -132,9 +133,7 @@ cases. In addition, every test function must take a "self" argument that is
 never used.
 
 The pytest-describe plugin allows organizing your tests in the nicer way shown
-above using describe-blocks. The functions inside the describe-blocks need not
-follow any special naming convention, they are always executed as tests unless
-they start with an underscore.
+above using describe-blocks. 
 
 
 Shared Behaviors
