@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.7', '3.8', '3.9', '3.10', '3.11', 'pypy3.9']
+        python: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12', 'pypy3.9', 'pypy3.10']
 
     steps:
     - uses: actions/checkout@v3
@@ -36,34 +36,42 @@ jobs:
 
     - name: Test with Python 3.7
       if: matrix.python == '3.7'
-      run: tox run -x "tox.envlist=py37-pytest{4,5,60,61,62,70,71,72,73}"
+      run: tox run -x "tox.envlist=py37-pytest{4,5,60,61,62,70,71,72,73,74}"
 
     - name: Test with Python 3.8
       if: matrix.python == '3.8'
-      run: tox run -x "tox.envlist=py38-pytest{4,5,60,61,62,70,71,72,73}"
+      run: tox run -x "tox.envlist=py38-pytest{4,5,60,61,62,70,71,72,73,74,80}"
 
     - name: Test with Python 3.9
       if: matrix.python == '3.9'
-      run: tox run -x "tox.envlist=py39-pytest{4,5,60,61,62,70,71,72,73}"
+      run: tox run -x "tox.envlist=py39-pytest{4,5,60,61,62,70,71,72,73,74,80}"
 
     - name: Test with Python 3.10
       if: matrix.python == '3.10'
-      run: tox run -x "tox.envlist=py310-pytest{62,70,71,72,73}"
+      run: tox run -x "tox.envlist=py310-pytest{70,71,72,73,74,80}"
 
     - name: Test with Python 3.11
       if: matrix.python == '3.11'
-      run: tox run -x "tox.envlist=spy311-pytest{73}"
+      run: tox run -x "tox.envlist=spy311-pytest{73,74,80}"
+
+    - name: Test with Python 3.12
+      if: matrix.python == '3.12'
+      run: tox run -x "tox.envlist=spy312-pytest{74,80}"
 
     - name: Test with PyPy 3.9
       if: matrix.python == 'pypy3.9'
-      run: tox run -x "tox.envlist=pypy39-pytest{4,5,60,61,62,70,71,72,73}"
+      run: tox run -x "tox.envlist=pypy39-pytest{4,5,60,61,62,70,71,72,73,74}"
+
+    - name: Test with PyPy 3.10
+      if: matrix.python == 'pypy3.10'
+      run: tox run -x "tox.envlist=pypy310-pytest{70,71,72,73,74,80}"
 
     - name: Linting with Flake8
-      if: matrix.python == '3.10'
+      if: matrix.python == '3.11'
       run: tox run -e flake8
 
     - name: Ensure full coverage
-      if: matrix.python == '3.10'
+      if: matrix.python == '3.11'
       run: tox run -e coverage
 
   deploy:

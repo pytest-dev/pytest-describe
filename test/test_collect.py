@@ -1,5 +1,7 @@
 """Test collection of test functions"""
 
+from textwrap import dedent
+
 
 def test_collect_only(testdir):
     testdir.makepyfile(
@@ -24,18 +26,18 @@ def test_collect_only(testdir):
     result = testdir.runpytest('--collectonly')
     result.assert_outcomes()
 
-    output = '\n'.join(filter(None, result.outlines))
-    assert """
-collected 4 items
-<Module test_collect_only.py>
-  <DescribeBlock 'describe_something'>
-    <Function is_foo>
-    <Function can_bar>
-  <DescribeBlock 'describe_something_else'>
-    <DescribeBlock 'describe_nested'>
-      <Function a_test>
-  <Function test_something>
-""" in output
+    output = '\n'.join(line.lstrip() for line in result.outlines)
+    assert "collected 4 items" in output
+    assert dedent("""
+        <Module test_collect_only.py>
+        <DescribeBlock 'describe_something'>
+        <Function is_foo>
+        <Function can_bar>
+        <DescribeBlock 'describe_something_else'>
+        <DescribeBlock 'describe_nested'>
+        <Function a_test>
+        <Function test_something>
+        """) in output
 
 
 def test_describe_evaluated_once(testdir):
