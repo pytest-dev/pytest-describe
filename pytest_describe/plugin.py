@@ -9,13 +9,13 @@ PYTEST_GTE_7_0 = getattr(pytest, 'version_tuple', (0, 0)) >= (7, 0)
 PYTEST_GTE_5_4 = PYTEST_GTE_7_0 or hasattr(pytest.Collector, 'from_parent')
 
 
-def trace_function(func, *args, **kwargs):  # pragma: no-cover
+def trace_function(func, *args, **kwargs):
     """Call a function and return its locals."""
     f_locals = {}
 
     def _trace_func(frame, event, arg):  # pragma: no cover
         # Activate local trace for first call only
-        if (frame.f_back.f_locals.get('_trace_func') == _trace_func
+        if (frame.f_back.f_locals.get('_trace_func') is _trace_func
                 and event == 'return'):
             f_locals.update(frame.f_locals)
 
