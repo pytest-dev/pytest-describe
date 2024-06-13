@@ -1,5 +1,7 @@
 """The pytest-describe plugin"""
 
+import asyncio
+import inspect
 import sys
 import types
 import pytest
@@ -21,7 +23,7 @@ def trace_function(func, *args, **kwargs):  # pragma: no-cover
 
     sys.setprofile(_trace_func)
     try:
-        func(*args, **kwargs)
+        asyncio.run(func(*args, **kwargs)) if inspect.iscoroutinefunction(func) else func(*args, **kwargs)
     finally:
         sys.setprofile(None)
 

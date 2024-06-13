@@ -45,3 +45,22 @@ def test_can_fail_and_pass(testdir):
 
     result = testdir.runpytest()
     result.assert_outcomes(passed=1, failed=1)
+
+
+def test_can_run_async_tests(testdir):
+    testdir.makepyfile(
+        """
+        import asyncio
+        import pytest
+
+        @pytest.mark.asyncio
+        async def describe_something():
+            async def describe_nested_ok():
+                async def passes():
+                    assert True
+            async def describe_nested_bad():
+                async def fails():
+                    assert False
+        """)
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1, failed=1)
