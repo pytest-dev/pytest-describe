@@ -17,62 +17,52 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12', 'pypy3.9', 'pypy3.10']
+        python: ['3.9', '3.10', '3.11', '3.12', 'pypy3.9', 'pypy3.10', 'pypy3.11']
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+    - name: Checkout repository
+      uses: actions/checkout@v5
 
-    - name: Set up Python ${{ matrix.python }}
-      uses: actions/setup-python@v4
+    - name: Set up uv with Python ${{ matrix.python }}
+      uses: astral-sh/setup-uv@v7
       with:
         python-version: ${{ matrix.python }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools
-        python -m pip install 'tox>=4.4,<5'
-
-    - name: Test with Python 3.7
-      if: matrix.python == '3.7'
-      run: tox run -x "tox.envlist=py37-pytest{4,5,60,61,62,70,71,72,73,74}"
-
-    - name: Test with Python 3.8
-      if: matrix.python == '3.8'
-      run: tox run -x "tox.envlist=py38-pytest{4,5,60,61,62,70,71,72,73,74,80}"
-
     - name: Test with Python 3.9
       if: matrix.python == '3.9'
-      run: tox run -x "tox.envlist=py39-pytest{4,5,60,61,62,70,71,72,73,74,80}"
-
-    - name: Test with Python 3.10
-      if: matrix.python == '3.10'
-      run: tox run -x "tox.envlist=py310-pytest{70,71,72,73,74,80}"
-
-    - name: Test with Python 3.11
-      if: matrix.python == '3.11'
-      run: tox run -x "tox.envlist=spy311-pytest{73,74,80}"
-
-    - name: Test with Python 3.12
-      if: matrix.python == '3.12'
-      run: tox run -x "tox.envlist=spy312-pytest{74,80}"
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py39-pytest{60,61,62,70,71,72,73,74,80,81,82,83,84}"
 
     - name: Test with PyPy 3.9
       if: matrix.python == 'pypy3.9'
-      run: tox run -x "tox.envlist=pypy39-pytest{4,5,60,61,62,70,71,72,73,74}"
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=pypy39-pytest{60,61,62,70,71,72,73,74,80,81,82,83,84}"
+
+    - name: Test with Python 3.10
+      if: matrix.python == '3.10'
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py310-pytest{70,71,72,73,74,80,81,82,83,84}"
 
     - name: Test with PyPy 3.10
       if: matrix.python == 'pypy3.10'
-      run: tox run -x "tox.envlist=pypy310-pytest{70,71,72,73,74,80}"
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=pypy310-pytest{70,71,72,73,74,80,81,82,83,84}"
+
+    - name: Test with Python 3.11
+      if: matrix.python == '3.11'
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py311-pytest{73,74,80,81,82,83,84}"
+
+    - name: Test with PyPy 3.11
+      if: matrix.python == 'pypy3.11'
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=pypy311-pytest{73,74,80,81,82,83,84}"
+
+    - name: Test with Python 3.12
+      if: matrix.python == '3.12'
+      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py312-pytest{74,80,81,82,83,84}"
 
     - name: Linting with Flake8
-      if: matrix.python == '3.11'
-      run: tox run -e flake8
+      if: matrix.python == '3.12'
+      run: uvx --from 'tox>=4.4,<5' tox run -e flake8
 
     - name: Ensure full coverage
-      if: matrix.python == '3.11'
-      run: tox run -e coverage
+      if: matrix.python == '3.12'
+      run: uvx --from 'tox>=4.4,<5' tox run -e coverage
 
   deploy:
     if: |
@@ -82,21 +72,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade wheel setuptools setuptools_scm
+          python-version: '3.12'
 
       - name: Build package
-        run: python setup.py sdist bdist_wheel
+        run: uv build
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1

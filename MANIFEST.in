@@ -1,6 +1,0 @@
-include README.md
-include LICENSE
-include setup.py
-include setup.cfg
-include tox.ini
-include test/*.py
