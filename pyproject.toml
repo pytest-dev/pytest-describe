@@ -20,6 +20,8 @@ classifiers = [
   "Operating System :: MacOS :: MacOS X",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
+  "Framework :: Pytest",
+  "Framework :: Pytest :: Plugin",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.9",
@@ -79,3 +81,11 @@ docstring-code-format = true
 
 [tool.pytest.ini_options]
 minversion = "6"
+
+[tool.coverage.run]
+branch = true
+source = ["src/pytest_describe"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
