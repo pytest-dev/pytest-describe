@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.9', '3.10', '3.11', '3.12', 'pypy3.9', 'pypy3.10', 'pypy3.11']
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14', 'pypy3.9', 'pypy3.10', 'pypy3.11']
 
     steps:
     - name: Checkout repository
@@ -32,39 +32,47 @@ jobs:
 
     - name: Test with Python 3.9
       if: matrix.python == '3.9'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py39-pytest{60,61,62,70,71,72,73,74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.26,<5' tox run -x "tox.envlist=py39-pytest{60,61,62,70,71,72,73,74,80,81,82,83,84}"
 
     - name: Test with PyPy 3.9
       if: matrix.python == 'pypy3.9'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=pypy39-pytest{60,61,62,70,71,72,73,74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.26,<5' tox run -x "tox.envlist=pypy39-pytest{60,61,62,70,71,72,73,74,80,81,82,83,84}"
 
     - name: Test with Python 3.10
       if: matrix.python == '3.10'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py310-pytest{70,71,72,73,74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=py310-pytest{70,71,72,73,74,80,81,82,83,84}"
 
     - name: Test with PyPy 3.10
       if: matrix.python == 'pypy3.10'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=pypy310-pytest{70,71,72,73,74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=pypy310-pytest{70,71,72,73,74,80,81,82,83,84}"
 
     - name: Test with Python 3.11
       if: matrix.python == '3.11'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py311-pytest{73,74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=py311-pytest{73,74,80,81,82,83,84}"
 
     - name: Test with PyPy 3.11
       if: matrix.python == 'pypy3.11'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=pypy311-pytest{73,74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=pypy311-pytest{73,74,80,81,82,83,84}"
 
     - name: Test with Python 3.12
       if: matrix.python == '3.12'
-      run: uvx --from 'tox>=4.4,<5' tox run -x "tox.envlist=py312-pytest{74,80,81,82,83,84}"
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=py312-pytest{74,80,81,82,83,84}"
+
+    - name: Test with Python 3.13
+      if: matrix.python == '3.13'
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=py313-pytest{84}"
+
+    - name: Test with Python 3.14
+      if: matrix.python == '3.14'
+      run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=py314-pytest{84}"
 
     - name: Linting with Flake8
-      if: matrix.python == '3.12'
-      run: uvx --from 'tox>=4.4,<5' tox run -e flake8
+      if: matrix.python == '3.14'
+      run: uvx --from 'tox>=4.31,<5' tox run -e flake8
 
     - name: Ensure full coverage
-      if: matrix.python == '3.12'
-      run: uvx --from 'tox>=4.4,<5' tox run -e coverage
+      if: matrix.python == '3.14'
+      run: uvx --from 'tox>=4.31,<5' tox run -e coverage
 
   deploy:
     if: |
@@ -80,7 +88,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Build package
         run: uv build
