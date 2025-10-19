@@ -20,13 +20,13 @@ pip install pytest-describe
 
 ## Usage
 
-Pytest will automatically find the plugin and use it when you run pytest. 
+Pytest will automatically find the plugin and use it when you run pytest.
 Running pytest will show that the plugin is loaded:
 
 ```sh
 $ pytest 
 ...
-plugins: describe-2.2.0
+plugins: describe-3.0.0
 ...
 ```
 

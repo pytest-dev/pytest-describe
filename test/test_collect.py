@@ -1,7 +1,5 @@
 """Test collection of test functions"""
 
-from textwrap import dedent
-
 
 def test_collect_only(pytester):
     pytester.makepyfile(
@@ -26,18 +24,17 @@ def test_collect_only(pytester):
     result = pytester.runpytest('--collectonly')
     result.assert_outcomes()
 
-    output = '\n'.join(line.lstrip() for line in result.outlines)
-    assert "collected 4 items" in output
-    assert dedent("""
-        <Module test_collect_only.py>
-        <DescribeBlock 'describe_something'>
-        <Function is_foo>
-        <Function can_bar>
-        <DescribeBlock 'describe_something_else'>
-        <DescribeBlock 'describe_nested'>
-        <Function a_test>
-        <Function test_something>
-        """) in output
+    result.stdout.fnmatch_lines([
+        "*collected 4 items*",
+        "*<Module test_collect_only.py>",
+        "*<DescribeBlock 'describe_something'>",
+        "*<Function is_foo>",
+        "*<Function can_bar>",
+        "*<DescribeBlock 'describe_something_else'>",
+        "*<DescribeBlock 'describe_nested'>",
+        "*<Function a_test>",
+        "*<Function test_something>",
+    ])
 
 
 def test_describe_evaluated_once(pytester):
