@@ -49,7 +49,7 @@ def make_module_from_function(func):
     # Import shared behaviors into the generated module. We do this before
     # importing the direct children, so that fixtures in the block that's
     # importing the behavior take precedence.
-    for shared_func in getattr(func, '_behaves_like', []):
+    for shared_func in getattr(func, '_behaves_like', ()):
         module.__dict__.update(evaluate_shared_behavior(shared_func))
 
     # Import children
@@ -64,17 +64,14 @@ def evaluate_shared_behavior(func):
     except AttributeError:
         shared_functions = {}
         for name, obj in trace_function(func).items():
-
             # Only functions and fixtures are relevant here
             if not is_function_or_fixture(obj):
                 continue
-
             # Mangle names of imported functions, except fixtures
             # because we want fixtures to be overridden in the block
             # that's importing the behavior.
             if not is_fixture_function_definition(obj):
                 name = obj._mangled_name = f"{func.__name__}::{name}"
-
             shared_functions[name] = obj
         func._shared_functions = shared_functions
     return shared_functions

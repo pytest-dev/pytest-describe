@@ -1,8 +1,8 @@
 """Test simple execution"""
 
 
-def test_can_pass(testdir):
-    testdir.makepyfile(
+def test_can_pass(pytester):
+    pytester.makepyfile(
         """
         def describe_something():
             def passes():
@@ -12,12 +12,12 @@ def test_can_pass(testdir):
                     assert True
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=2)
 
 
-def test_can_fail(testdir):
-    testdir.makepyfile(
+def test_can_fail(pytester):
+    pytester.makepyfile(
         """
         def describe_something():
             def fails():
@@ -27,12 +27,12 @@ def test_can_fail(testdir):
                     assert False
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(failed=2)
 
 
-def test_can_fail_and_pass(testdir):
-    testdir.makepyfile(
+def test_can_fail_and_pass(pytester):
+    pytester.makepyfile(
         """
         def describe_something():
             def describe_nested_ok():
@@ -43,5 +43,5 @@ def test_can_fail_and_pass(testdir):
                     assert False
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=1, failed=1)

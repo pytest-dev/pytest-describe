@@ -1,8 +1,8 @@
 """Test verbose output"""
 
 
-def test_verbose_output(testdir):
-    testdir.makepyfile(
+def test_verbose_output(pytester):
+    pytester.makepyfile(
         """
         def describe_something():
             def describe_nested_ok():
@@ -14,7 +14,7 @@ def test_verbose_output(testdir):
         """
     )
 
-    result = testdir.runpytest("-v")
+    result = pytester.runpytest("-v")
 
     result.assert_outcomes(passed=1, failed=1)
 

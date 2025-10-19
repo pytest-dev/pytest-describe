@@ -3,8 +3,8 @@
 from textwrap import dedent
 
 
-def test_collect_only(testdir):
-    testdir.makepyfile(
+def test_collect_only(pytester):
+    pytester.makepyfile(
         """
         def describe_something():
             def is_foo():
@@ -23,7 +23,7 @@ def test_collect_only(testdir):
             pass
         """)
 
-    result = testdir.runpytest('--collectonly')
+    result = pytester.runpytest('--collectonly')
     result.assert_outcomes()
 
     output = '\n'.join(line.lstrip() for line in result.outlines)
@@ -40,8 +40,8 @@ def test_collect_only(testdir):
         """) in output
 
 
-def test_describe_evaluated_once(testdir):
-    testdir.makepyfile(
+def test_describe_evaluated_once(pytester):
+    pytester.makepyfile(
         """
         count = 0
         def describe_is_evaluated_only_once():
@@ -56,5 +56,5 @@ def test_describe_evaluated_once(testdir):
                     assert count == 1
     """)
 
-    result = testdir.runpytest('-v')
+    result = pytester.runpytest('-v')
     result.assert_outcomes(passed=3)

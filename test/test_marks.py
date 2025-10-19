@@ -10,8 +10,8 @@ def assert_outcomes(result, **kwargs):
     } == kwargs  # pragma: no cover
 
 
-def test_special_marks(testdir):
-    testdir.makepyfile(
+def test_special_marks(pytester):
+    pytester.makepyfile(
         """
         import pytest
 
@@ -33,12 +33,12 @@ def test_special_marks(testdir):
                 assert foo == int(foo)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=3, xfailed=1, xpassed=1, skipped=1)
 
 
-def test_multiple_variables_parametrize(testdir):
-    testdir.makepyfile(
+def test_multiple_variables_parametrize(pytester):
+    pytester.makepyfile(
         """
         import pytest
 
@@ -59,12 +59,12 @@ def test_multiple_variables_parametrize(testdir):
                 assert bar == int(bar)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=6)
 
 
-def test_cartesian_parametrize(testdir):
-    testdir.makepyfile(
+def test_cartesian_parametrize(pytester):
+    pytester.makepyfile(
         """
         import pytest
 
@@ -77,12 +77,12 @@ def test_cartesian_parametrize(testdir):
                 assert bar == int(bar)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=9)
 
 
-def test_parametrize_applies_to_describe(testdir):
-    testdir.makepyfile(
+def test_parametrize_applies_to_describe(pytester):
+    pytester.makepyfile(
         """
         import pytest
 
@@ -102,12 +102,12 @@ def test_parametrize_applies_to_describe(testdir):
                     assert foo == int(foo)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=15)
 
 
-def test_cartesian_parametrize_on_describe(testdir):
-    testdir.makepyfile(
+def test_cartesian_parametrize_on_describe(pytester):
+    pytester.makepyfile(
         """
         import pytest
 
@@ -120,12 +120,12 @@ def test_cartesian_parametrize_on_describe(testdir):
                 assert bar == int(bar)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=9)
 
 
-def test_parametrize_with_shared(testdir):
-    testdir.makepyfile(
+def test_parametrize_with_shared(pytester):
+    pytester.makepyfile(
         """
         import pytest
         from pytest import fixture
@@ -151,12 +151,12 @@ def test_parametrize_with_shared(testdir):
                 return foo
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=6)
 
 
-def test_parametrize_with_shared_but_different_values(testdir):
-    testdir.makepyfile(
+def test_parametrize_with_shared_but_different_values(pytester):
+    pytester.makepyfile(
         """
         import pytest
         from pytest import fixture
@@ -184,12 +184,12 @@ def test_parametrize_with_shared_but_different_values(testdir):
                 return ('bark', foo)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=6)
 
 
-def test_coincident_parametrize_at_top(testdir):
-    testdir.makepyfile(
+def test_coincident_parametrize_at_top(pytester):
+    pytester.makepyfile(
         """
         import pytest
 
@@ -207,12 +207,12 @@ def test_coincident_parametrize_at_top(testdir):
                 assert foo == int(foo)
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=12)
 
 
-def test_keywords(testdir):
-    testdir.makepyfile(
+def test_keywords(pytester):
+    pytester.makepyfile(
         """
         import pytest
         def describe_a():
@@ -222,15 +222,15 @@ def test_keywords(testdir):
                 pass
         """)
 
-    result = testdir.runpytest('-k', 'foo')
+    result = pytester.runpytest('-k', 'foo')
     try:
         result.assert_outcomes(passed=1, deselected=1)
     except TypeError:  # pragma: no cover pytest < 7.0
         assert_outcomes(result, passed=1, deselected=1)
 
 
-def test_custom_markers(testdir):
-    testdir.makeini(
+def test_custom_markers(pytester):
+    pytester.makeini(
         """
         [pytest]
         markers =
@@ -238,7 +238,7 @@ def test_custom_markers(testdir):
           bar
         """)
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         """
         import pytest
         def describe_a():
@@ -250,15 +250,15 @@ def test_custom_markers(testdir):
                 pass
         """)
 
-    result = testdir.runpytest('-m', 'foo')
+    result = pytester.runpytest('-m', 'foo')
     try:
         result.assert_outcomes(passed=1, deselected=1)
     except TypeError:  # pragma: no cover pytest < 7.0
         assert_outcomes(result, passed=1, deselected=1)
 
 
-def test_module_marks(testdir):
-    testdir.makepyfile(
+def test_module_marks(pytester):
+    pytester.makepyfile(
         """
         import pytest
         pytestmark = [ pytest.mark.foo ]
@@ -269,12 +269,12 @@ def test_module_marks(testdir):
                     pass
         """)
 
-    result = testdir.runpytest('-m', 'foo')
+    result = pytester.runpytest('-m', 'foo')
     result.assert_outcomes(passed=1)
 
 
-def test_mark_at_describe_function(testdir):
-    testdir.makepyfile(
+def test_mark_at_describe_function(pytester):
+    pytester.makepyfile(
         """
         import pytest
         @pytest.mark.foo
@@ -287,12 +287,12 @@ def test_mark_at_describe_function(testdir):
                 pass
         """)
 
-    result = testdir.runpytest('-m', 'foo')
+    result = pytester.runpytest('-m', 'foo')
     result.assert_outcomes(passed=2)
 
 
-def test_mark_stacking(testdir):
-    testdir.makepyfile(
+def test_mark_stacking(pytester):
+    pytester.makepyfile(
         """
         import pytest
         @pytest.fixture()
@@ -314,5 +314,5 @@ def test_mark_stacking(testdir):
                     ('foo', 'describe_marks')]
         """)
 
-    result = testdir.runpytest()
+    result = pytester.runpytest()
     result.assert_outcomes(passed=2)

@@ -3,14 +3,14 @@
 from textwrap import dedent
 
 
-def test_collect_custom_prefix(testdir):
-    testdir.makeini(
+def test_collect_custom_prefix(pytester):
+    pytester.makeini(
         """
         [pytest]
         describe_prefixes = foo bar
         """)
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         """
         def foo_scope():
             def bar_context():
@@ -18,7 +18,7 @@ def test_collect_custom_prefix(testdir):
                     pass
         """)
 
-    result = testdir.runpytest('--collectonly')
+    result = pytester.runpytest('--collectonly')
     result.assert_outcomes()
 
     output = '\n'.join(line.lstrip() for line in result.outlines if line)
