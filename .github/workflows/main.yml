@@ -66,9 +66,9 @@ jobs:
       if: matrix.python == '3.14'
       run: uvx --from 'tox>=4.31,<5' tox run -x "tox.envlist=py314-pytest{84}"
 
-    - name: Linting with Flake8
+    - name: Lint everything with Ruff
       if: matrix.python == '3.14'
-      run: uvx --from 'tox>=4.31,<5' tox run -e flake8
+      run: uvx --from 'tox>=4.31,<5' tox run -e lint
 
     - name: Ensure full coverage
       if: matrix.python == '3.14'

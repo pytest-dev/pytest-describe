@@ -19,22 +19,25 @@ def test_collect_only(pytester):
             pass
         def test_something():
             pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('--collectonly')
+    result = pytester.runpytest("--collectonly")
     result.assert_outcomes()
 
-    result.stdout.fnmatch_lines([
-        "*collected 4 items*",
-        "*<Module test_collect_only.py>",
-        "*<DescribeBlock 'describe_something'>",
-        "*<Function is_foo>",
-        "*<Function can_bar>",
-        "*<DescribeBlock 'describe_something_else'>",
-        "*<DescribeBlock 'describe_nested'>",
-        "*<Function a_test>",
-        "*<Function test_something>",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "*collected 4 items*",
+            "*<Module test_collect_only.py>",
+            "*<DescribeBlock 'describe_something'>",
+            "*<Function is_foo>",
+            "*<Function can_bar>",
+            "*<DescribeBlock 'describe_something_else'>",
+            "*<DescribeBlock 'describe_nested'>",
+            "*<Function a_test>",
+            "*<Function test_something>",
+        ]
+    )
 
 
 def test_describe_evaluated_once(pytester):
@@ -51,7 +54,8 @@ def test_describe_evaluated_once(pytester):
             def describe_nested():
                 def three():
                     assert count == 1
-    """)
+    """
+    )
 
-    result = pytester.runpytest('-v')
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=3)

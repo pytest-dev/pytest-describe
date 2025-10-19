@@ -22,7 +22,8 @@ def test_shared_behaviors(pytester):
             @fixture
             def sound():
                 return "bark"
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(failed=1, passed=1)
@@ -58,7 +59,8 @@ def test_multiple_shared_behaviors(pytester):
                 @fixture
                 def sound():
                     return "bark"
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(failed=1, passed=3)
@@ -81,9 +83,10 @@ def test_fixture(pytester):
         @behaves_like(a_duck)
         def describe_a_normal_duck():
             pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-v')
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=1)
 
 
@@ -106,9 +109,10 @@ def test_override_fixture(pytester):
             @fixture
             def sound():
                 return "bark"
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-v')
+    result = pytester.runpytest("-v")
     result.assert_outcomes(failed=1)
 
 
@@ -128,9 +132,10 @@ def test_name_mangling(pytester):
             foo = 4242
             def it_does_something():
                 assert foo == 4242
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-v')
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=2)
 
 
@@ -157,9 +162,10 @@ def test_nested_name_mangling(pytester):
             def describe_thing():
                 def it_does_something():
                     pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-v')
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=5)
 
 
@@ -182,7 +188,8 @@ def test_evaluated_once(pytester):
         @behaves_like(thing)
         def describe_something_else():
             pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-v')
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=2)

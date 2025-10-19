@@ -13,7 +13,8 @@ def test_can_access_local_fixture(pytester):
 
             def thing_is_42(thing):
                 assert thing == 42
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)
@@ -32,7 +33,8 @@ def test_can_access_fixture_from_nested_scope(pytester):
             def describe_a_nested_scope():
                 def thing_is_42(thing):
                     assert thing == 42
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)
@@ -58,7 +60,8 @@ def test_local_fixture_overrides(pytester):
 
             def thing_is_12(thing):
                 assert thing == 12
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=2)

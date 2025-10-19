@@ -10,7 +10,8 @@ def test_skip_classes(pytester):
             class cls:
                 def __call__(self):
                     assert True
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)

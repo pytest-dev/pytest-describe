@@ -2,17 +2,20 @@
 
 import sys
 import types
+
 import pytest
 
 try:
     from _pytest.fixtures import FixtureFunctionDefinition
 except ImportError:  # pragma: no cover (pytest < 8.4)
+
     def is_function_or_fixture(obj):
         return isinstance(obj, types.FunctionType)
 
     def is_fixture_function_definition(obj):
-        return hasattr(obj, '_pytestfixturefunction')
+        return hasattr(obj, "_pytestfixturefunction")
 else:
+
     def is_function_or_fixture(obj):
         return isinstance(obj, (types.FunctionType, FixtureFunctionDefinition))
 
@@ -20,7 +23,7 @@ else:
         return isinstance(obj, FixtureFunctionDefinition)
 
 
-PYTEST_GTE_7_0 = getattr(pytest, 'version_tuple', (6, 0)) >= (7, 0)
+PYTEST_GTE_7_0 = getattr(pytest, "version_tuple", (6, 0)) >= (7, 0)
 
 
 def trace_function(func, *args, **kwargs):
@@ -29,8 +32,10 @@ def trace_function(func, *args, **kwargs):
 
     def _trace_func(frame, event, arg):  # pragma: no cover
         # Activate local trace for first call only
-        if (frame.f_back.f_locals.get('_trace_func') is _trace_func
-                and event == 'return'):
+        if (
+            frame.f_back.f_locals.get("_trace_func") is _trace_func
+            and event == "return"
+        ):
             f_locals.update(frame.f_locals)
 
     sys.setprofile(_trace_func)
@@ -49,7 +54,7 @@ def make_module_from_function(func):
     # Import shared behaviors into the generated module. We do this before
     # importing the direct children, so that fixtures in the block that's
     # importing the behavior take precedence.
-    for shared_func in getattr(func, '_behaves_like', ()):
+    for shared_func in getattr(func, "_behaves_like", ()):
         module.__dict__.update(evaluate_shared_behavior(shared_func))
 
     # Import children
@@ -83,14 +88,14 @@ class DescribeBlock(pytest.Module):
     @classmethod
     def from_parent(cls, parent, obj):
         """Construct a new node for the describe block"""
-        name = getattr(obj, '_mangled_name', obj.__name__)
-        nodeid = parent.nodeid + '::' + name
+        name = getattr(obj, "_mangled_name", obj.__name__)
+        nodeid = parent.nodeid + "::" + name
         if PYTEST_GTE_7_0:
-            self = super().from_parent(
-                parent=parent, path=parent.path, nodeid=nodeid)
+            self = super().from_parent(parent=parent, path=parent.path, nodeid=nodeid)
         else:  # pragma: no cover
             self = super().from_parent(
-                parent=parent, fspath=parent.fspath, nodeid=nodeid)
+                parent=parent, fspath=parent.fspath, nodeid=nodeid
+            )
         self.name = name
         self.funcobj = obj
         return self
@@ -107,7 +112,7 @@ class DescribeBlock(pytest.Module):
     def _importtestmodule(self):
         """Import a describe block as if it was a module"""
         module = make_module_from_function(self.funcobj)
-        self.own_markers = getattr(self.funcobj, 'pytestmark', [])
+        self.own_markers = getattr(self.funcobj, "pytestmark", [])
         return module
 
     def funcnamefilter(self, name):
@@ -115,7 +120,7 @@ class DescribeBlock(pytest.Module):
 
         We do not require the 'test_' prefix for the specs.
         """
-        return not name.startswith('_')
+        return not name.startswith("_")
 
     def classnamefilter(self, name):
         """Don't allow test classes inside describe"""
@@ -128,12 +133,16 @@ class DescribeBlock(pytest.Module):
 def pytest_pycollect_makeitem(collector, name, obj):
     """Collector items from describe blocks."""
     if isinstance(obj, types.FunctionType):
-        for prefix in collector.config.getini('describe_prefixes'):
+        for prefix in collector.config.getini("describe_prefixes"):
             if obj.__name__.startswith(prefix):
                 return DescribeBlock.from_parent(collector, obj)
 
 
 def pytest_addoption(parser):
     """Add configuration option describe_prefixes."""
-    parser.addini("describe_prefixes", type="args", default=("describe",),
-                  help="prefixes for Python describe function discovery")
+    parser.addini(
+        "describe_prefixes",
+        type="args",
+        default=("describe",),
+        help="prefixes for Python describe function discovery",
+    )

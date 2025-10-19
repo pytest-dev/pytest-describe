@@ -51,3 +51,31 @@ source-include = ["tox.ini", "test/**"]
 [build-system]
 requires = ["uv_build>=0.9.4,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+src = ["src", "test"]
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle (errors)
+  "F",  # Pyflakes
+  "W",  # pycodestyle (warnings)
+  "I",  # isort
+  "UP", # pyupgrade
+  "B",  # flake8-bugbear
+  "C4", # flake8-comprehensions
+]
+ignore = []
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+minversion = "6"

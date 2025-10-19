@@ -4,9 +4,7 @@
 def assert_outcomes(result, **kwargs):
     """Get all relevant outcomes"""
     assert {
-        key: value
-        for key, value in result.parseoutcomes().items()
-        if key != 'seconds'
+        key: value for key, value in result.parseoutcomes().items() if key != "seconds"
     } == kwargs  # pragma: no cover
 
 
@@ -31,7 +29,8 @@ def test_special_marks(pytester):
             @pytest.mark.parametrize('foo', (1, 2, 3))
             def isint(foo):
                 assert foo == int(foo)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=3, xfailed=1, xpassed=1, skipped=1)
@@ -57,7 +56,8 @@ def test_multiple_variables_parametrize(pytester):
             def isint_tuple_names(foo, bar):
                 assert foo == int(foo)
                 assert bar == int(bar)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=6)
@@ -75,7 +75,8 @@ def test_cartesian_parametrize(pytester):
             def isint(foo, bar):
                 assert foo == int(foo)
                 assert bar == int(bar)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=9)
@@ -100,7 +101,8 @@ def test_parametrize_applies_to_describe(pytester):
             def describe_nested():
                 def isint3(foo):
                     assert foo == int(foo)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=15)
@@ -118,7 +120,8 @@ def test_cartesian_parametrize_on_describe(pytester):
             def isint(foo, bar):
                 assert foo == int(foo)
                 assert bar == int(bar)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=9)
@@ -149,7 +152,8 @@ def test_parametrize_with_shared(pytester):
             @fixture
             def sound(foo):
                 return foo
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=6)
@@ -182,7 +186,8 @@ def test_parametrize_with_shared_but_different_values(pytester):
             @fixture
             def sound(foo):
                 return ('bark', foo)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=6)
@@ -205,7 +210,8 @@ def test_coincident_parametrize_at_top(pytester):
         def describe_marks2():
             def isint2(foo):
                 assert foo == int(foo)
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=12)
@@ -220,9 +226,10 @@ def test_keywords(pytester):
                 pass
             def bar_test():
                 pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-k', 'foo')
+    result = pytester.runpytest("-k", "foo")
     try:
         result.assert_outcomes(passed=1, deselected=1)
     except TypeError:  # pragma: no cover pytest < 7.0
@@ -236,7 +243,8 @@ def test_custom_markers(pytester):
         markers =
           foo
           bar
-        """)
+        """
+    )
 
     pytester.makepyfile(
         """
@@ -248,9 +256,10 @@ def test_custom_markers(pytester):
             @pytest.mark.bar
             def bar_test():
                 pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-m', 'foo')
+    result = pytester.runpytest("-m", "foo")
     try:
         result.assert_outcomes(passed=1, deselected=1)
     except TypeError:  # pragma: no cover pytest < 7.0
@@ -267,9 +276,10 @@ def test_module_marks(pytester):
             def describe_b():
                 def a_test():
                     pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-m', 'foo')
+    result = pytester.runpytest("-m", "foo")
     result.assert_outcomes(passed=1)
 
 
@@ -285,9 +295,10 @@ def test_mark_at_describe_function(pytester):
             @pytest.mark.bar
             def b_test():
                 pass
-        """)
+        """
+    )
 
-    result = pytester.runpytest('-m', 'foo')
+    result = pytester.runpytest("-m", "foo")
     result.assert_outcomes(passed=2)
 
 
@@ -312,7 +323,8 @@ def test_mark_stacking(pytester):
                     ('baz', 'all_marks_are_chained'),
                     ('bar', 'all_marks_are_chained'),
                     ('foo', 'describe_marks')]
-        """)
+        """
+    )
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=2)
