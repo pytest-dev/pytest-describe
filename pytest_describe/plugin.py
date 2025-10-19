@@ -5,7 +5,23 @@ import types
 import pytest
 
 
-PYTEST_GTE_7_0 = getattr(pytest, 'version_tuple', (0, 0)) >= (7, 0)
+try:
+    from _pytest.fixtures import FixtureFunctionDefinition
+except ImportError:  # pragma: no cover (pytest < 8.4)
+    def is_function_or_fixture(obj):
+        return isinstance(obj, types.FunctionType)
+
+    def is_fixture_function_definition(obj):
+        return hasattr(obj, '_pytestfixturefunction')
+else:
+    def is_function_or_fixture(obj):
+        return isinstance(obj, (types.FunctionType, FixtureFunctionDefinition))
+
+    def is_fixture_function_definition(obj):
+        return isinstance(obj, FixtureFunctionDefinition)
+
+
+PYTEST_GTE_7_0 = getattr(pytest, 'version_tuple', (4, 0)) >= (7, 0)
 PYTEST_GTE_5_4 = PYTEST_GTE_7_0 or hasattr(pytest.Collector, 'from_parent')
 
 
@@ -50,14 +66,14 @@ def evaluate_shared_behavior(func):
     except AttributeError:
         shared_functions = {}
         for name, obj in trace_function(func).items():
-            # Only functions are relevant here
-            if not isinstance(obj, types.FunctionType):
+            # Only functions and fixtures are relevant here
+            if not is_function_or_fixture(obj):
                 continue
 
-            # Mangle names of imported functions, except fixtures because we
-            # want fixtures to be overridden in the block that's importing the
-            # behavior.
-            if not hasattr(obj, '_pytestfixturefunction'):
+            # Mangle names of imported functions, except fixtures
+            # because we want fixtures to be overridden in the block
+            # that's importing the behavior.
+            if not is_fixture_function_definition(obj):
                 name = obj._mangled_name = f"{func.__name__}::{name}"
 
             shared_functions[name] = obj

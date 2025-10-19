@@ -26,7 +26,7 @@ Running pytest will show that the plugin is loaded:
 ```sh
 $ pytest 
 ...
-plugins: describe-2.2.0
+plugins: describe-2.2.1
 ...
 ```
 
