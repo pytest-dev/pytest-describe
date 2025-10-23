@@ -60,6 +60,10 @@ jobs:
       startsWith(github.event.ref, 'refs/tags') &&
       github.repository == 'pytest-dev/pytest-describe'
     runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -76,5 +80,4 @@ jobs:
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.pypi_token }}
+          attestations: true
