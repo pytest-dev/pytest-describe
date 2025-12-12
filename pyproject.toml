@@ -1,6 +1,6 @@
 [project]
 name = "pytest-describe"
-version = "3.0.0"
+version = "3.1.0"
 description = "Describe-style plugin for pytest"
 readme = "README.md"
 requires-python = ">=3.9"
