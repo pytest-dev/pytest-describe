@@ -34,7 +34,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "pytest>=6,<9",
+  "pytest>=6,<10",
 ]
 
 [project.urls]
