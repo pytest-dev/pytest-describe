@@ -99,6 +99,21 @@ class DescribeBlock(pytest.Module):
         self.name = name
         self.funcobj = obj
         return self
+    
+    @property
+    def describe_function_heirarchy(self):
+        """Get the hierarchy of describe functions leading to and including this block"""
+        if not hasattr(self, "_describe_function_heirarchy"):
+            hierarchy = []
+            current = self
+            
+            while current:
+                if isinstance(current, DescribeBlock):
+                    hierarchy.append(current.funcobj)
+                current = current.parent
+
+            self._describe_function_heirarchy = hierarchy
+        return self._describe_function_heirarchy
 
     def collect(self):
         """Get list of children"""
@@ -136,7 +151,19 @@ def pytest_pycollect_makeitem(collector, name, obj):
         for prefix in collector.config.getini("describe_prefixes"):
             if obj.__name__.startswith(prefix):
                 return DescribeBlock.from_parent(collector, obj)
+            
+def pytest_collection_modifyitems(session, config, items):
+    """Add API to all test items to get the describe heirarchy."""
+    for item in items:
+        item.get_describe_function_heirarchy = types.MethodType(get_describe_function_heirarchy, item)
 
+def get_describe_function_heirarchy(self):
+    """Get the hierarchy of describe functions leading to this test item"""
+    return (
+        self.parent.describe_function_heirarchy
+        if hasattr(self, "parent") and hasattr(self.parent, "describe_function_heirarchy")
+        else []
+    )
 
 def pytest_addoption(parser):
     """Add configuration option describe_prefixes."""
