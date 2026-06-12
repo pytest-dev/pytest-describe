@@ -175,6 +175,41 @@ For the same reason, fixtures with a scope higher than `function` and
 autouse fixtures should not use describe arguments, because they may be
 set up before the values are injected.
 
+## Using docstrings as describe block names
+
+By default, describe-blocks are reported under the name of their function,
+e.g. `describe_wallet`. If you want more descriptive test reports, you can
+set the `describe_docstrings` configuration option, e.g. in your
+`pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+describe_docstrings = true
+```
+
+Describe-blocks are then named after the first line of the docstring of
+their describe function, if it has one:
+
+```python
+def describe_wallet():
+    """a wallet"""
+
+    def describe_when_empty():
+        """when it is empty"""
+
+        def it_has_no_balance(wallet):
+            assert wallet.balance == 0
+```
+
+This will be reported as:
+
+```text
+test_wallet.py::a wallet::when it is empty::it_has_no_balance PASSED
+```
+
+Note that the docstring-based names become part of the test node IDs, which
+are used when selecting tests with `-k` or by node ID on the command line.
+
 ## Why bother?
 
 I've found that quite often my tests have one "dimension" more than my production
@@ -254,3 +289,20 @@ Fixtures defined in the block that includes the shared behavior take precedence
 over fixtures defined in the shared behavior. This rule only applies to
 fixtures, not to other functions (nested describe blocks and tests). Instead,
 they are all collected as separate tests.
+
+## Accessing describe functions from plugins
+
+Reporting plugins sometimes need to know which describe-blocks enclose a
+given test, e.g. to show their docstrings in the test report. For this
+purpose, pytest-describe provides the function `get_describe_functions`
+that returns the describe functions wrapping a collected test item,
+starting with the outermost block:
+
+```python
+from pytest_describe import get_describe_functions
+
+def pytest_collection_modifyitems(items):
+    for item in items:
+        for func in get_describe_functions(item):
+            print(item.nodeid, func.__name__, func.__doc__)
+```
