@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import inspect
 import sys
 import types
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from typing import Any
 
 import pytest
@@ -25,6 +26,58 @@ else:
 
     def is_fixture_function_definition(obj: object) -> bool:
         return isinstance(obj, FixtureFunctionDefinition)
+
+
+class DescribeArgument:
+    """Placeholder for a fixture passed as argument to a describe block.
+
+    Describe blocks run at collection time, when fixtures are not yet
+    available. The real fixture value is injected into the closure cells
+    before each test runs.
+    """
+
+    __slots__ = ("name",)
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __repr__(self) -> str:
+        return (
+            f"<describe argument {self.name!r}"
+            " (the fixture is only available inside tests)>"
+        )
+
+
+def get_describe_args(func: Callable[..., Any]) -> tuple[str, ...]:
+    """Get the fixture names a describe block declares as parameters."""
+    return tuple(
+        name
+        for name, param in inspect.signature(func).parameters.items()
+        if param.kind
+        in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY, param.POSITIONAL_ONLY)
+    )
+
+
+def find_argument_cells(namespace: dict[str, Any]) -> dict[str, types.CellType]:
+    """Find closure cells holding describe arguments in collected functions.
+
+    Cells are shared between all nested functions referencing the same
+    outer variable, so recording one cell per argument name is enough.
+    """
+    cells: dict[str, types.CellType] = {}
+    for obj in namespace.values():
+        # Unwrap fixture function definitions (pytest >= 8.4)
+        func = inspect.unwrap(obj) if callable(obj) else obj
+        if not isinstance(func, types.FunctionType):
+            continue
+        for cell in func.__closure__ or ():
+            try:
+                contents = cell.cell_contents
+            except ValueError:  # pragma: no cover (empty cell)
+                continue
+            if isinstance(contents, DescribeArgument):
+                cells[contents.name] = cell
+    return cells
 
 
 def trace_function(
@@ -54,7 +107,9 @@ def trace_function(
     return f_locals
 
 
-def make_module_from_function(func: types.FunctionType) -> types.ModuleType:
+def make_module_from_function(
+    func: types.FunctionType, args: tuple[str, ...] = ()
+) -> types.ModuleType:
     """Evaluate the local scope of a function as if it was a module."""
     module = types.ModuleType(func.__name__)
 
@@ -64,8 +119,11 @@ def make_module_from_function(func: types.FunctionType) -> types.ModuleType:
     for shared_func in getattr(func, "_behaves_like", ()):
         module.__dict__.update(evaluate_shared_behavior(shared_func))
 
-    # Import children
-    module.__dict__.update(trace_function(func))
+    # Import children, passing placeholders for declared fixture arguments
+    funclocals = trace_function(func, **{name: DescribeArgument(name) for name in args})
+    for name in args:
+        funclocals.pop(name, None)
+    module.__dict__.update(funclocals)
     return module
 
 
@@ -96,6 +154,9 @@ class DescribeBlock(pytest.Module):
     # of type FunctionType, so we need to ignore some errors when using it.
     funcobj: types.FunctionType
 
+    describe_args: tuple[str, ...]
+    describe_cells: dict[str, types.CellType]
+
     @classmethod
     def from_parent(  # type: ignore[override]
         cls, parent: pytest.Collector, obj: types.FunctionType
@@ -108,6 +169,8 @@ class DescribeBlock(pytest.Module):
         )
         self.name = name
         self.funcobj = obj  # type: ignore[assignment]
+        self.describe_args = get_describe_args(obj)
+        self.describe_cells = {}
         return self
 
     def collect(self) -> Iterable[pytest.Item | pytest.Collector]:
@@ -121,7 +184,11 @@ class DescribeBlock(pytest.Module):
 
     def _importtestmodule(self) -> types.ModuleType:
         """Import a describe block as if it was a module"""
-        module = make_module_from_function(self.funcobj)  # type: ignore[arg-type]
+        module = make_module_from_function(
+            self.funcobj,  # type: ignore[arg-type]
+            self.describe_args,
+        )
+        self.describe_cells = find_argument_cells(module.__dict__)
         self.own_markers = getattr(self.funcobj, "pytestmark", [])
         return module
 
@@ -149,6 +216,86 @@ def pytest_pycollect_makeitem(
             if obj.__name__.startswith(prefix):
                 return DescribeBlock.from_parent(collector, obj)
     return None
+
+
+# Since pytest 8.1, FixtureManager.getfixturedefs takes the node itself
+# instead of its node id.
+_getfixturedefs_takes_node = pytest.version_tuple >= (8, 1)
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
+    """Add fixtures declared as describe arguments to the fixture closure.
+
+    This makes pytest resolve these fixtures for every test in the block,
+    including generating parametrized tests for parametrized fixtures.
+    """
+    definition = metafunc.definition
+    arg_names = [
+        name
+        for node in definition.listchain()
+        if isinstance(node, DescribeBlock)
+        for name in node.describe_args
+    ]
+    if not arg_names:
+        return
+    fixturemanager = definition.session._fixturemanager
+    fixtureinfo = definition._fixtureinfo
+    node = definition if _getfixturedefs_takes_node else definition.nodeid
+    for name in arg_names:
+        if name in metafunc.fixturenames:
+            continue
+        # metafunc.fixturenames is the same list as the names_closure
+        # of the fixture info used by the test item later
+        metafunc.fixturenames.append(name)
+        # the name must also be in initialnames, otherwise it is removed
+        # again by prune_dependency_tree() when the test is parametrized
+        # (since pytest 9, FuncFixtureInfo is a frozen dataclass)
+        object.__setattr__(
+            fixtureinfo, "initialnames", (*fixtureinfo.initialnames, name)
+        )
+        fixturedefs = fixturemanager.getfixturedefs(
+            name,
+            node,  # type: ignore[arg-type]  # node id before pytest 8.1
+        )
+        if fixturedefs:
+            metafunc._arg2fixturedefs[name] = list(fixturedefs)
+
+
+def gather_describe_cells(item: pytest.Function) -> dict[str, types.CellType]:
+    """Collect the argument cells of all describe blocks enclosing a test."""
+    cells: dict[str, types.CellType] = {}
+    for node in item.listchain():
+        if isinstance(node, DescribeBlock):
+            cells.update(node.describe_cells)
+    return cells
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_setup(item: pytest.Item) -> Iterator[None]:
+    """Inject fixture values into the closure cells of describe arguments."""
+    yield  # let pytest set up the fixtures first
+    funcargs = getattr(item, "funcargs", None)
+    if funcargs is None or not isinstance(item, pytest.Function):
+        return
+    saved: list[tuple[types.CellType, Any]] = []
+    for name, cell in gather_describe_cells(item).items():
+        if name in funcargs:
+            saved.append((cell, cell.cell_contents))
+            cell.cell_contents = funcargs[name]
+    if saved:
+        item._describe_saved_cells = saved  # type: ignore[attr-defined]
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_teardown(item: pytest.Item) -> Iterator[None]:
+    """Restore the placeholders in the closure cells after the test."""
+    yield  # let pytest tear down the fixtures first
+    saved = getattr(item, "_describe_saved_cells", None)
+    if saved:
+        for cell, old_value in reversed(saved):
+            cell.cell_contents = old_value
+        del item._describe_saved_cells  # type: ignore[attr-defined]
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
