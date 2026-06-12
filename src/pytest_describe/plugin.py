@@ -1,7 +1,11 @@
 """The pytest-describe plugin"""
 
+from __future__ import annotations
+
 import sys
 import types
+from collections.abc import Callable, Iterable
+from typing import Any
 
 import pytest
 
@@ -9,31 +13,34 @@ try:
     from _pytest.fixtures import FixtureFunctionDefinition
 except ImportError:  # pragma: no cover (pytest < 8.4)
 
-    def is_function_or_fixture(obj):
+    def is_function_or_fixture(obj: object) -> bool:
         return isinstance(obj, types.FunctionType)
 
-    def is_fixture_function_definition(obj):
+    def is_fixture_function_definition(obj: object) -> bool:
         return hasattr(obj, "_pytestfixturefunction")
 else:
 
-    def is_function_or_fixture(obj):
-        return isinstance(obj, (types.FunctionType, FixtureFunctionDefinition))
+    def is_function_or_fixture(obj: object) -> bool:
+        return isinstance(obj, types.FunctionType | FixtureFunctionDefinition)
 
-    def is_fixture_function_definition(obj):
+    def is_fixture_function_definition(obj: object) -> bool:
         return isinstance(obj, FixtureFunctionDefinition)
 
 
-PYTEST_GTE_7_0 = getattr(pytest, "version_tuple", (6, 0)) >= (7, 0)
-
-
-def trace_function(func, *args, **kwargs):
+def trace_function(
+    func: Callable[..., Any], *args: Any, **kwargs: Any
+) -> dict[str, Any]:
     """Call a function and return its locals."""
-    f_locals = {}
+    f_locals: dict[str, Any] = {}
 
-    def _trace_func(frame, event, arg):  # pragma: no cover
+    def _trace_func(
+        frame: types.FrameType, event: str, arg: Any
+    ) -> None:  # pragma: no cover
         # Activate local trace for first call only
+        back = frame.f_back
         if (
-            frame.f_back.f_locals.get("_trace_func") is _trace_func
+            back is not None
+            and back.f_locals.get("_trace_func") is _trace_func
             and event == "return"
         ):
             f_locals.update(frame.f_locals)
@@ -47,7 +54,7 @@ def trace_function(func, *args, **kwargs):
     return f_locals
 
 
-def make_module_from_function(func):
+def make_module_from_function(func: types.FunctionType) -> types.ModuleType:
     """Evaluate the local scope of a function as if it was a module."""
     module = types.ModuleType(func.__name__)
 
@@ -62,10 +69,10 @@ def make_module_from_function(func):
     return module
 
 
-def evaluate_shared_behavior(func):
+def evaluate_shared_behavior(func: types.FunctionType) -> dict[str, Any]:
     """Evaluate the local scope of a function."""
     try:
-        shared_functions = func._shared_functions
+        shared_functions: dict[str, Any] = func._shared_functions  # type: ignore[attr-defined]
     except AttributeError:
         shared_functions = {}
         for name, obj in trace_function(func).items():
@@ -78,67 +85,73 @@ def evaluate_shared_behavior(func):
             if not is_fixture_function_definition(obj):
                 name = obj._mangled_name = f"{func.__name__}::{name}"
             shared_functions[name] = obj
-        func._shared_functions = shared_functions
+        func._shared_functions = shared_functions  # type: ignore[attr-defined]
     return shared_functions
 
 
 class DescribeBlock(pytest.Module):
     """Module-like object representing the scope of a describe block"""
 
+    # Note: mypy applies the descriptor protocol to class-level attributes
+    # of type FunctionType, so we need to ignore some errors when using it.
+    funcobj: types.FunctionType
+
     @classmethod
-    def from_parent(cls, parent, obj):
+    def from_parent(  # type: ignore[override]
+        cls, parent: pytest.Collector, obj: types.FunctionType
+    ) -> DescribeBlock:
         """Construct a new node for the describe block"""
         name = getattr(obj, "_mangled_name", obj.__name__)
         nodeid = parent.nodeid + "::" + name
-        if PYTEST_GTE_7_0:
-            self = super().from_parent(parent=parent, path=parent.path, nodeid=nodeid)
-        else:  # pragma: no cover
-            self = super().from_parent(
-                parent=parent, fspath=parent.fspath, nodeid=nodeid
-            )
+        self: DescribeBlock = super().from_parent(
+            parent=parent, path=parent.path, nodeid=nodeid
+        )
         self.name = name
-        self.funcobj = obj
+        self.funcobj = obj  # type: ignore[assignment]
         return self
 
-    def collect(self):
+    def collect(self) -> Iterable[pytest.Item | pytest.Collector]:
         """Get list of children"""
         self.session._fixturemanager.parsefactories(self)
         return super().collect()
 
-    def _getobj(self):
+    def _getobj(self) -> types.ModuleType:
         """Get the underlying Python object"""
         return self._importtestmodule()
 
-    def _importtestmodule(self):
+    def _importtestmodule(self) -> types.ModuleType:
         """Import a describe block as if it was a module"""
-        module = make_module_from_function(self.funcobj)
+        module = make_module_from_function(self.funcobj)  # type: ignore[arg-type]
         self.own_markers = getattr(self.funcobj, "pytestmark", [])
         return module
 
-    def funcnamefilter(self, name):
+    def funcnamefilter(self, name: str) -> bool:
         """Treat all nested functions as tests
 
         We do not require the 'test_' prefix for the specs.
         """
         return not name.startswith("_")
 
-    def classnamefilter(self, name):
+    def classnamefilter(self, name: str) -> bool:
         """Don't allow test classes inside describe"""
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.name!r}>"
 
 
-def pytest_pycollect_makeitem(collector, name, obj):
-    """Collector items from describe blocks."""
+def pytest_pycollect_makeitem(
+    collector: pytest.Collector, name: str, obj: object
+) -> DescribeBlock | None:
+    """Collect items from describe blocks."""
     if isinstance(obj, types.FunctionType):
         for prefix in collector.config.getini("describe_prefixes"):
             if obj.__name__.startswith(prefix):
                 return DescribeBlock.from_parent(collector, obj)
+    return None
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
     """Add configuration option describe_prefixes."""
     parser.addini(
         "describe_prefixes",

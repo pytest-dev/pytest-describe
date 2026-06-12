@@ -24,16 +24,16 @@ Pytest will automatically find the plugin and use it when you run pytest.
 Running pytest will show that the plugin is loaded:
 
 ```sh
-$ pytest 
+$ pytest
 ...
-plugins: describe-3.0.0
+plugins: describe-3.2.0
 ...
 ```
 
 Tests can now be written in describe-blocks.
 Here is an example for testing a Wallet class:
 
-```python 
+```python
 import pytest
 
 
@@ -49,19 +49,19 @@ class Wallet:
 
     def add_cash(self, amount):
         self.balance += amount
-        
-        
+
+
 def describe_wallet():
-    
+
     def describe_start_empty():
-        
+
         @pytest.fixture
         def wallet():
             return Wallet()
 
         def initial_amount(wallet):
             assert wallet.balance == 0
-    
+
         def add_cash(wallet):
             wallet.add_cash(80)
             assert wallet.balance == 80
@@ -71,48 +71,48 @@ def describe_wallet():
                 wallet.spend_cash(10)
 
     def describe_with_starting_balance():
-        
+
         @pytest.fixture
         def wallet():
             return Wallet(20)
 
         def initial_amount(wallet):
             assert wallet.balance == 20
-    
+
         def describe_adding():
-            
+
             def add_little_cash(wallet):
                 wallet.add_cash(5)
                 assert wallet.balance == 25
-    
+
             def add_much_cash(wallet):
                 wallet.add_cash(980)
                 assert wallet.balance == 1000
-                
+
         def describe_spending():
-            
+
             def spend_cash(wallet):
                 wallet.spend_cash(15)
                 assert wallet.balance == 5
-        
+
             def spend_too_much_cash(wallet):
                 with pytest.raises(ValueError):
                     wallet.spend_cash(25)
 ```
 
-The default prefix for describe-blocks is `describe_`, but you can configure it 
+The default prefix for describe-blocks is `describe_`, but you can configure it
 in the pytest/python configuration file via `describe_prefixes` or
 via the command line option `--describe-prefixes`.
 
 For example in your `pyproject.toml`:
 
-```toml    
+```toml
 [tool.pytest.ini_options]
 describe_prefixes = ["custom_prefix_"]
 ```
 
-Functions prefixed with `_` in the describe-block are not collected as tests. 
-This can be used to group helper functions. Otherwise, functions inside the 
+Functions prefixed with `_` in the describe-block are not collected as tests.
+This can be used to group helper functions. Otherwise, functions inside the
 describe-blocks need not follow any special naming convention.
 
 ```python

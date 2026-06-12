@@ -1,9 +1,9 @@
 [project]
 name = "pytest-describe"
-version = "3.1.0"
+version = "3.2.0"
 description = "Describe-style plugin for pytest"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
@@ -23,7 +23,6 @@ classifiers = [
   "Framework :: Pytest",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -32,9 +31,10 @@ classifiers = [
   "Topic :: Software Development :: Libraries",
   "Topic :: Software Development :: Testing",
   "Topic :: Utilities",
+  "Typing :: Typed",
 ]
 dependencies = [
-  "pytest>=6,<10",
+  "pytest>=7,<10",
 ]
 
 [project.urls]
@@ -54,7 +54,7 @@ requires = ["uv_build>=0.9.4,<0.10.0"]
 build-backend = "uv_build"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 src = ["src", "test"]
 
@@ -77,8 +77,12 @@ line-ending = "lf"
 skip-magic-trailing-comma = false
 docstring-code-format = true
 
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
 [tool.pytest.ini_options]
-minversion = "6"
+minversion = "7"
 
 [tool.coverage.run]
 branch = true
