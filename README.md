@@ -8,7 +8,51 @@ that allows tests to be written in arbitrary nested describe-blocks,
 similar to RSpec (Ruby) and Jasmine (JavaScript).
 
 The main inspiration for this was
-a [video](https://www.youtube.com/watch?v=JJle8L8FRy0>) by Gary Bernhardt.
+a [video](https://www.youtube.com/watch?v=JJle8L8FRy0) by Gary Bernhardt.
+
+## Why bother?
+
+I've found that quite often my tests have one "dimension" more than my production
+code. The production code is organized into packages, modules, classes
+(sometimes), and functions. I like to organize my tests in the same way, but
+tests also have different *cases* for each function. This tends to end up with
+a set of tests for each module (or class), where each test has to name both a
+function and a *case*. For instance:
+
+```python
+def test_my_function_with_default_arguments():
+def test_my_function_with_some_other_arguments():
+def test_my_function_throws_exception():
+def test_my_function_handles_exception():
+def test_some_other_function_returns_true():
+def test_some_other_function_returns_false():
+```
+
+It's much nicer to do this:
+
+```python
+def describe_my_function():
+    def with_default_arguments():
+    def with_some_other_arguments():
+    def it_throws_exception():
+    def it_handles_exception():
+
+def describe_some_other_function():
+    def it_returns_true():
+    def it_returns_false():
+```
+
+It has the additional advantage that you can have marks and fixtures that apply
+locally to each group of test functions.
+
+With pytest, it's possible to organize tests in a similar way with classes.
+However, I think classes are awkward. I don't think the convention of using
+camel-case names for classes fit very well when testing functions in different
+cases. In addition, every test function must take a "self" argument that is
+never used.
+
+The pytest-describe plugin allows organizing your tests in the nicer way shown
+above using describe-blocks.
 
 ## Installation
 
@@ -112,8 +156,10 @@ describe_prefixes = ["custom_prefix_"]
 ```
 
 Functions prefixed with `_` in the describe-block are not collected as tests.
-This can be used to group helper functions. Otherwise, functions inside the
-describe-blocks need not follow any special naming convention.
+This can be used to group helper functions. Thanks to closures, a helper
+defined in an enclosing describe-block is visible in all nested blocks.
+Otherwise, functions inside the describe-blocks need not follow any special
+naming convention.
 
 ```python
 def describe_function():
@@ -125,7 +171,6 @@ def describe_function():
         value = _helper()
         ...
 ```
-
 
 ## Fixtures as describe arguments
 
@@ -145,10 +190,10 @@ def user():
 def describe_create_book(user):
 
     def with_valid_book(valid_book):
-        # use the user and valid_book fixtures ...
+        ...  # use the user and valid_book fixtures
 
     def with_invalid_book(invalid_book):
-        # use the user and invalid_book fixtures ...
+        ...  # use the user and invalid_book fixtures
 ```
 
 This is functionally equivalent to declaring the fixture as an argument of
@@ -174,6 +219,42 @@ def describe_create_book(user):
 For the same reason, fixtures with a scope higher than `function` and
 autouse fixtures should not use describe arguments, because they may be
 set up before the values are injected.
+
+## Shared behaviors
+
+If you've used RSpec's shared examples or test class inheritance, then you may
+be familiar with the benefit of having the same tests apply to
+multiple "subjects" or "SUTs" (systems under test).
+
+```python
+from pytest import fixture
+from pytest_describe import behaves_like
+
+def a_duck():
+    def it_quacks(sound):
+        assert sound == "quack"
+
+@behaves_like(a_duck)
+def describe_something_that_quacks():
+    @fixture
+    def sound():
+        return "quack"
+
+    # the it_quacks test in this describe will pass
+
+@behaves_like(a_duck)
+def describe_something_that_barks():
+    @fixture
+    def sound():
+        return "bark"
+
+    # the it_quacks test in this describe will fail (as expected)
+```
+
+Fixtures defined in the block that includes the shared behavior take precedence
+over fixtures defined in the shared behavior. This rule only applies to
+fixtures, not to other functions (nested describe blocks and tests). Instead,
+they are all collected as separate tests.
 
 ## Using docstrings as describe block names
 
@@ -209,86 +290,6 @@ test_wallet.py::a wallet::when it is empty::it_has_no_balance PASSED
 
 Note that the docstring-based names become part of the test node IDs, which
 are used when selecting tests with `-k` or by node ID on the command line.
-
-## Why bother?
-
-I've found that quite often my tests have one "dimension" more than my production
-code. The production code is organized into packages, modules, classes
-(sometimes), and functions. I like to organize my tests in the same way, but
-tests also have different *cases* for each function. This tends to end up with
-a set of tests for each module (or class), where each test has to name both a
-function and a *case*. For instance:
-
-```python
-def test_my_function_with_default_arguments():
-def test_my_function_with_some_other_arguments():
-def test_my_function_throws_exception():
-def test_my_function_handles_exception():
-def test_some_other_function_returns_true():
-def test_some_other_function_returns_false():
-```
-
-It's much nicer to do this:
-
-```python
-def describe_my_function():
-    def with_default_arguments():
-    def with_some_other_arguments():
-    def it_throws_exception():
-    def it_handles_exception():
-
-def describe_some_other_function():
-    def it_returns_true():
-    def it_returns_false():
-```
-
-It has the additional advantage that you can have marks and fixtures that apply
-locally to each group of test function.
-
-With pytest, it's possible to organize tests in a similar way with classes.
-However, I think classes are awkward. I don't think the convention of using
-camel-case names for classes fit very well when testing functions in different
-cases. In addition, every test function must take a "self" argument that is
-never used.
-
-The pytest-describe plugin allows organizing your tests in the nicer way shown
-above using describe-blocks.
-
-## Shared Behaviors
-
-If you've used rspec's shared examples or test class inheritance, then you may
-be familiar with the benefit of having the same tests apply to
-multiple "subjects" or "suts" (system under test).
-
-```python
-from pytest import fixture
-from pytest_describe import behaves_like
-
-def a_duck():
-    def it_quacks(sound):
-        assert sound == "quack"
-
-@behaves_like(a_duck)
-def describe_something_that_quacks():
-    @fixture
-    def sound():
-        return "quack"
-
-    # the it_quacks test in this describe will pass
-
-@behaves_like(a_duck)
-def describe_something_that_barks():
-    @fixture
-    def sound():
-        return "bark"
-
-    # the it_quacks test in this describe will fail (as expected)
-```
-
-Fixtures defined in the block that includes the shared behavior take precedence
-over fixtures defined in the shared behavior. This rule only applies to
-fixtures, not to other functions (nested describe blocks and tests). Instead,
-they are all collected as separate tests.
 
 ## Accessing describe functions from plugins
 
