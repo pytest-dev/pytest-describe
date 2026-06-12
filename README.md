@@ -127,6 +127,54 @@ def describe_function():
 ```
 
 
+## Fixtures as describe arguments
+
+When several tests in a describe-block need the same fixture, you can pass
+the fixture name as an argument to the describe function instead of
+repeating it in every test:
+
+```python
+import pytest
+
+
+@pytest.fixture
+def user():
+    return create_user()
+
+
+def describe_create_book(user):
+
+    def with_valid_book(valid_book):
+        # use the user and valid_book fixtures ...
+
+    def with_invalid_book(invalid_book):
+        # use the user and invalid_book fixtures ...
+```
+
+This is functionally equivalent to declaring the fixture as an argument of
+every test in the block. In particular, parametrized fixtures generate
+multiple tests as usual, and fixtures defined inside the block can use the
+describe arguments as well. Shared behaviors can also declare arguments,
+which are then treated like arguments of the importing describe-blocks.
+
+Note that describe-blocks run when tests are *collected*, before any
+fixture is set up. The arguments are therefore only placeholders during
+collection, and the actual fixture values are injected when the tests run.
+Using an argument in the describe-block body itself — anywhere outside a
+test or fixture function — raises an error at collection time:
+
+```python
+def describe_create_book(user):
+    name = user.name  # error: user is only available inside the tests
+
+    def with_valid_book(valid_book):
+        name = user.name  # works fine
+```
+
+For the same reason, fixtures with a scope higher than `function` and
+autouse fixtures should not use describe arguments, because they may be
+set up before the values are injected.
+
 ## Why bother?
 
 I've found that quite often my tests have one "dimension" more than my production
