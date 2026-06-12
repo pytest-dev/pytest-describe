@@ -199,6 +199,10 @@ class DescribeBlock(pytest.Module):
     ) -> DescribeBlock:
         """Construct a new node for the describe block"""
         name = getattr(obj, "_mangled_name", obj.__name__)
+        if parent.config.getini("describe_docstrings"):
+            doc = inspect.getdoc(obj)
+            if doc:
+                name = doc.splitlines()[0].strip()
         nodeid = parent.nodeid + "::" + name
         self: DescribeBlock = super().from_parent(
             parent=parent, path=parent.path, nodeid=nodeid
@@ -251,6 +255,22 @@ class DescribeBlock(pytest.Module):
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.name!r}>"
+
+
+def get_describe_functions(
+    node: pytest.Item | pytest.Collector,
+) -> tuple[types.FunctionType, ...]:
+    """Get the functions of the describe blocks enclosing the given node.
+
+    The functions are returned in the order of nesting, starting with the
+    outermost describe block. Reporting plugins can use this function to
+    access the original describe functions and e.g. their docstrings.
+    """
+    return tuple(
+        block.funcobj  # type: ignore[misc]
+        for block in node.listchain()
+        if isinstance(block, DescribeBlock)
+    )
 
 
 def pytest_pycollect_makeitem(
@@ -375,4 +395,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         type="args",
         default=("describe",),
         help="prefixes for Python describe function discovery",
+    )
+    parser.addini(
+        "describe_docstrings",
+        type="bool",
+        default=False,
+        help="use docstrings as names for describe blocks",
     )
