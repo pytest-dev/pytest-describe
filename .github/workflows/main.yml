@@ -33,13 +33,13 @@ jobs:
     - name: Run tests for ${{ matrix.python }}
       run: |
         case "${{ matrix.python }}" in
-          '3.10') ENVS="py310-pytest{70,71,72,73,74,80,81,82,83,84,90}" ;;
-          'pypy3.10') ENVS="pypy310-pytest{70,71,72,73,74,80,81,82,83,84,90}" ;;
-          '3.11') ENVS="py311-pytest{73,74,80,81,82,83,84,90}" ;;
-          'pypy3.11') ENVS="pypy311-pytest{73,74,80,81,82,83,84,90}" ;;
-          '3.12') ENVS="py312-pytest{74,80,81,82,83,84,90}" ;;
-          '3.13') ENVS="py313-pytest{84,90}" ;;
-          '3.14') ENVS="py314-pytest{84,90}" ;;
+          '3.10') ENVS="py310-pytest{70,71,72,73,74,80,81,82,83,84,90,91}" ;;
+          'pypy3.10') ENVS="pypy310-pytest{70,71,72,73,74,80,81,82,83,84,90,91}" ;;
+          '3.11') ENVS="py311-pytest{73,74,80,81,82,83,84,90,91}" ;;
+          'pypy3.11') ENVS="pypy311-pytest{73,74,80,81,82,83,84,90,91}" ;;
+          '3.12') ENVS="py312-pytest{74,80,81,82,83,84,90,91}" ;;
+          '3.13') ENVS="py313-pytest{84,90,91}" ;;
+          '3.14') ENVS="py314-pytest{84,90,91}" ;;
           *) echo "Unsupported python: ${{ matrix.python }}" ; exit 1 ;;
         esac
         uvx --from 'tox>=4.55,<5' tox run -x "tox.envlist=${ENVS}"
